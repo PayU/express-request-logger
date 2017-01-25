@@ -1,3 +1,5 @@
+'use strict';
+
 var expressLogger = require('../lib/express-logger'),
     httpMocks = require('node-mocks-http'),
     loggerHelper = require('../lib/logger-helper'),
