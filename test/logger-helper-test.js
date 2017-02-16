@@ -19,7 +19,9 @@ describe('logger-helpers tests', function(){
     var request, response, options;
 
     var expectedAuditRequest = {
-        headers: {},
+        headers: {
+            header1: 'some-value'
+        },
         body: JSON.stringify(body),
         url: url,
         method: method
@@ -32,39 +34,43 @@ describe('logger-helpers tests', function(){
     before(function(){
         sandbox = sinon.sandbox.create();
         clock = sinon.useFakeTimers();
+        shouldAuditURLStub = sandbox.stub(utils, 'shouldAuditURL');
     });
     after(function(){
         sandbox.restore();
         clock.restore();
     });
-    beforeEach(function(){
-        request = httpMocks.createRequest({
-            method: method,
-            url: url,
-            body: body
-        });
-
-        request.startTime = new Date();
-        response = httpMocks.createResponse();
-
-        options = {
-            request: {
-                audit: true
-            },
-            response: {
-                audit: true
-            },
-            logger: {}
-        };
-        options.logger.info = function(){};
-
-        loggerInfoStub = sandbox.stub(options.logger, 'info');
-        shouldAuditURLStub = sandbox.stub(utils, 'shouldAuditURL');
-    });
-    afterEach(function(){
-        utils.shouldAuditURL.restore();
-    });
     describe('When calling auditRequest', function(){
+        beforeEach(function(){
+            request = httpMocks.createRequest({
+                method: method,
+                url: url,
+                body: body,
+                headers: {
+                    header1: 'some-value'
+                }
+            });
+
+            request.startTime = new Date();
+            response = httpMocks.createResponse();
+
+            options = {
+                request: {
+                    audit: true
+                },
+                response: {
+                    audit: true
+                },
+                logger: {}
+            };
+            options.logger.info = function(){};
+
+            loggerInfoStub = sandbox.stub(options.logger, 'info');
+
+        });
+        afterEach(function(){
+            utils.shouldAuditURL.reset();
+        });
         describe('And shouldAuditURL returns false', function(){
             it('Should not audit request', function(){
                 shouldAuditURLStub.returns(false);
@@ -89,9 +95,77 @@ describe('logger-helpers tests', function(){
                 should(loggerInfoStub.calledWith({ request: undefined })).eql(true);
             });
         });
+
+        describe('And exclude headers contains an header to exclude', function(){
+            var headerToExclude = 'header-to-exclude';
+            beforeEach(function(){
+                request.headers[headerToExclude] = 'other-value';
+            });
+            it('Should audit log without the specified header', function(){
+                options.request.excludeHeaders = [headerToExclude];
+                shouldAuditURLStub.returns(true);
+
+                loggerHelper.auditRequest(request, options);
+                should(loggerInfoStub.calledOnce).eql(true);
+                should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
+            });
+            it('Should audit log without the specified headers, if there are moer than one', function(){
+                var anotherHeaderToExclude = 'another';
+                options.request.excludeHeaders = [headerToExclude, anotherHeaderToExclude];
+                request.headers[anotherHeaderToExclude] = 'some value';
+                shouldAuditURLStub.returns(true);
+
+                loggerHelper.auditRequest(request, options);
+                should(loggerInfoStub.calledOnce).eql(true);
+                should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
+            });
+            it('Should audit log with all headers, if exclude headers is an empty list', function(){
+                options.request.excludeHeaders = ['other-header'];
+                shouldAuditURLStub.returns(true);
+
+                loggerHelper.auditRequest(request, options);
+                should(loggerInfoStub.calledOnce).eql(true);
+
+                expectedAuditRequest.headers[headerToExclude] = 'other-value';
+                should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
+
+                // Clear created header for other tests
+                delete expectedAuditRequest.headers[headerToExclude];
+            });
+        });
     });
 
     describe('When calling auditResponse', function(){
+        beforeEach(function(){
+            request = httpMocks.createRequest({
+                method: method,
+                url: url,
+                body: body,
+                headers: {
+                    header1: 'some-value'
+                }
+            });
+
+            request.startTime = new Date();
+            response = httpMocks.createResponse();
+
+            options = {
+                request: {
+                    audit: true
+                },
+                response: {
+                    audit: true
+                },
+                logger: {}
+            };
+            options.logger.info = function(){};
+
+            loggerInfoStub = sandbox.stub(options.logger, 'info');
+
+        });
+        afterEach(function(){
+            utils.shouldAuditURL.reset();
+        });
         describe('And shouldAuditURL returns false', function(){
             it('Should not audit request/response', function(){
                 shouldAuditURLStub.returns(false);
