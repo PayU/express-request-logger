@@ -28,7 +28,7 @@ describe('logger-helpers tests', function(){
     };
     var expectedAuditResponse = {
         status_code: 200,
-        body: undefined,
+        body: JSON.stringify(body),
         elapsed: elapsed
     };
     before(function(){
@@ -53,7 +53,7 @@ describe('logger-helpers tests', function(){
 
             request.startTime = new Date();
             response = httpMocks.createResponse();
-
+            response._body = body;
             options = {
                 request: {
                     audit: true
@@ -148,7 +148,7 @@ describe('logger-helpers tests', function(){
 
             request.startTime = new Date();
             response = httpMocks.createResponse();
-
+            response._body = body;
             options = {
                 request: {
                     audit: true
