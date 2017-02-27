@@ -53,7 +53,7 @@ describe('logger-helpers tests', function(){
 
             request.startTime = new Date();
             response = httpMocks.createResponse();
-            response._body = body;
+            response._body = JSON.stringify(body);
             options = {
                 request: {
                     audit: true
@@ -148,7 +148,7 @@ describe('logger-helpers tests', function(){
 
             request.startTime = new Date();
             response = httpMocks.createResponse();
-            response._body = body;
+            response._body = JSON.stringify(body);
             options = {
                 request: {
                     audit: true
