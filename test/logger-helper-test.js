@@ -95,7 +95,40 @@ describe('logger-helpers tests', function(){
                 should(loggerInfoStub.calledWith({ request: undefined })).eql(true);
             });
         });
+        describe('And additionalAudit is not empty', function(){
+            beforeEach(function(){
+                request.additionalAudit = {
+                    field1: 'field1',
+                    field2: 'field2'
+                };
+                expectedAuditRequest.field1 = 'field1';
+                expectedAuditRequest.field2 = 'field2';
+            });
+            afterEach(function(){
+                delete request.additionalAudit;
+                delete expectedAuditRequest.field1;
+                delete expectedAuditRequest.field2;
+            });
+            it('Should add to audit the additional audit details', function(){
+                shouldAuditURLStub.returns(true);
 
+                loggerHelper.auditRequest(request, options);
+                should(loggerInfoStub.calledOnce).eql(true);
+                should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
+            });
+
+            it('Should not add to audit the additional audit details if its an empty object', function(){
+                request.additionalAudit = {};
+                delete expectedAuditRequest.field1;
+                delete expectedAuditRequest.field2;
+
+                shouldAuditURLStub.returns(true);
+
+                loggerHelper.auditRequest(request, options);
+                should(loggerInfoStub.calledOnce).eql(true);
+                should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
+            });
+        });
         describe('And exclude headers contains an header to exclude', function(){
             var headerToExclude = 'header-to-exclude';
             beforeEach(function(){
