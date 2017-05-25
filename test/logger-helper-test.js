@@ -101,8 +101,6 @@ describe('logger-helpers tests', function(){
                     field1: 'field1',
                     field2: 'field2'
                 };
-                expectedAuditRequest.field1 = 'field1';
-                expectedAuditRequest.field2 = 'field2';
             });
             afterEach(function(){
                 delete request.additionalAudit;
@@ -114,7 +112,7 @@ describe('logger-helpers tests', function(){
 
                 loggerHelper.auditRequest(request, options);
                 should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
+                should(loggerInfoStub.calledWith({ request: expectedAuditRequest, field1: 'field1', field2: 'field2' })).eql(true);
             });
 
             it('Should not add to audit the additional audit details if its an empty object', function(){
