@@ -84,6 +84,45 @@ describe('utils tests', function(){
             var masked = utils.maskJson({}, fieldsToMask);
             should(masked).eql({});
         });
+        it('Should mask all field occurrences', function () {
+            let fieldsToMask = ['password'];
+            let originalJsonObj = {
+                password: 'password',
+                user: {
+                    name: 'papa user',
+                    password: 'password to change'
+                },
+                users: [
+                    {
+                        name: 'name1',
+                        password: 'password to change'
+                    },
+                    {
+                        name: 'name2',
+                        password: 'password to change'
+                    }
+                ]
+            }
+            let expectedJsonObj = {
+                password: expectedMaskedValue,
+                user: {
+                    name: 'papa user',
+                    password: expectedMaskedValue
+                },
+                users: [
+                    {
+                        name: 'name1',
+                        password: expectedMaskedValue
+                    },
+                    {
+                        name: 'name2',
+                        password: expectedMaskedValue
+                    }
+                ]
+            }
+            var masked = utils.maskJson(originalJsonObj, fieldsToMask);
+            should(masked).eql(expectedJsonObj);
+        });
     });
 
     describe('When calling shouldAuditURL', function(){
