@@ -6,6 +6,7 @@ var httpMocks = require('node-mocks-http'),
     utils = require('../lib/utils'),
     sinon = require('sinon');
 
+var NA = 'N/A';
 var method = 'POST';
 var url = 'somepath/123';
 var elapsed = 10;
@@ -13,18 +14,23 @@ var body = {
     body: 'body'
 };
 
+var query = {
+    q1: 'something',
+    q2: 'fishy'
+}
 
 describe('logger-helpers tests', function(){
     var sandbox, clock, loggerInfoStub, shouldAuditURLStub;
     var request, response, options;
 
     var expectedAuditRequest = {
+        method: method,
+        url: url,
+        query: query,
         headers: {
             header1: 'some-value'
         },
         body: JSON.stringify(body),
-        url: url,
-        method: method
     };
     var expectedAuditResponse = {
         status_code: 200,
@@ -45,6 +51,7 @@ describe('logger-helpers tests', function(){
             request = httpMocks.createRequest({
                 method: method,
                 url: url,
+                query: query,
                 body: body,
                 headers: {
                     header1: 'some-value'
@@ -171,6 +178,7 @@ describe('logger-helpers tests', function(){
             request = httpMocks.createRequest({
                 method: method,
                 url: url,
+                query: query,
                 body: body,
                 headers: {
                     header1: 'some-value'
@@ -260,14 +268,15 @@ describe('logger-helpers tests', function(){
                 should(loggerInfoStub.calledOnce).eql(true);
                 should(loggerInfoStub.calledWith({
                     request: {
-                        headers: 'N/A',
-                        body: 'N/A',
-                        url: 'N/A',
-                        method: 'N/A'
+                        headers: NA,
+                        query: NA,
+                        body: NA,
+                        url: NA,
+                        method: NA
                     },
                     response: {
-                        status_code: 'N/A',
-                        body: 'N/A',
+                        status_code: NA,
+                        body: NA,
                         elapsed: 0
                     }
                 })).eql(true);
