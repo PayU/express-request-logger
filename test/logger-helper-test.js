@@ -3,10 +3,12 @@
 var httpMocks = require('node-mocks-http'),
     loggerHelper = require('../lib/logger-helper'),
     should = require('should'),
+    _ = require('lodash'),
     utils = require('../lib/utils'),
     sinon = require('sinon');
 
 var NA = 'N/A';
+var MASK = 'XXXXX';
 var method = 'POST';
 var url = 'somepath/123';
 var elapsed = 10;
@@ -73,7 +75,6 @@ describe('logger-helpers tests', function(){
             options.logger.info = function(){};
 
             loggerInfoStub = sandbox.stub(options.logger, 'info');
-
         });
         afterEach(function(){
             utils.shouldAuditURL.reset();
@@ -134,6 +135,36 @@ describe('logger-helpers tests', function(){
                 should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
             });
         });
+        describe('And mask query params that are set to be masked', function(){
+            it('Should mask the query param', function(){
+                var maskedQuery = 'q1'
+                options.request.maskQuery = [maskedQuery];
+                shouldAuditURLStub.returns(true);
+
+                loggerHelper.auditRequest(request, options);
+                should(loggerInfoStub.calledOnce).eql(true);
+
+                let expected = _.cloneDeep(expectedAuditRequest)
+                expected.query[maskedQuery] = MASK;
+                should(loggerInfoStub.args[0]).eql([{ request: expected }]);
+
+                // Clear created header for other tests
+            });
+            it('Should mask all query params', function(){
+                var maskedQuery1 = 'q1'
+                var maskedQuery2 = 'q2'
+                options.request.maskQuery = [maskedQuery1, maskedQuery2];
+                shouldAuditURLStub.returns(true);
+
+                loggerHelper.auditRequest(request, options);
+                should(loggerInfoStub.calledOnce).eql(true);
+
+                let expected = _.cloneDeep(expectedAuditRequest)
+                expected.query[maskedQuery1] = MASK;
+                expected.query[maskedQuery2] = MASK;
+                should(loggerInfoStub.args[0]).eql([{ request: expected }]);
+            });
+        })
         describe('And exclude headers contains an header to exclude', function(){
             var headerToExclude = 'header-to-exclude';
             beforeEach(function(){
