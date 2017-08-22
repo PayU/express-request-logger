@@ -22,7 +22,7 @@ This is a [Node.js](https://nodejs.org/en/) module available through the
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
 ```sh
-$ npm install express-request-logger
+$ npm install express-requests-logger
 ```
 
 ## API
@@ -79,7 +79,7 @@ Specific configuration for responses
 
 ##### audit
 
-Boolean - `true` - include request in audit, `false` - don't.
+Boolean - `true` - include response in audit, `false` - don't.
 
 ##### maskBody
 
