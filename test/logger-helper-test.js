@@ -11,7 +11,9 @@ var NA = 'N/A';
 var MASK = 'XXXXX';
 var method = 'POST';
 var url = 'somepath/123';
-var elapsed = 10;
+var startTime = new Date();
+var endTime = new Date();
+var elapsed = endTime - startTime;
 var body = {
     body: 'body'
 };
@@ -32,12 +34,16 @@ describe('logger-helpers tests', function(){
         headers: {
             header1: 'some-value'
         },
+        timestamp: startTime.toISOString(),
+        timestamp_ms: startTime.valueOf(),
         body: JSON.stringify(body),
     };
     var expectedAuditResponse = {
         status_code: 200,
-        body: JSON.stringify(body),
-        elapsed: elapsed
+        timestamp: endTime.toISOString(),
+        timestamp_ms: endTime.valueOf(),
+        elapsed: elapsed,
+        body: JSON.stringify(body)
     };
     before(function(){
         sandbox = sinon.sandbox.create();
@@ -60,9 +66,10 @@ describe('logger-helpers tests', function(){
                 }
             });
 
-            request.startTime = new Date();
+            request.timestamp = startTime;
             response = httpMocks.createResponse();
             response._body = JSON.stringify(body);
+            response.timestamp = endTime;
             options = {
                 request: {
                     audit: true
@@ -216,9 +223,10 @@ describe('logger-helpers tests', function(){
                 }
             });
 
-            request.startTime = new Date();
+            request.timestamp = startTime;
             response = httpMocks.createResponse();
             response._body = JSON.stringify(body);
+            response.timestamp = endTime;
             options = {
                 request: {
                     audit: true
@@ -299,16 +307,20 @@ describe('logger-helpers tests', function(){
                 should(loggerInfoStub.calledOnce).eql(true);
                 should(loggerInfoStub.calledWith({
                     request: {
-                        headers: NA,
-                        query: NA,
-                        body: NA,
+                        method: NA,
                         url: NA,
-                        method: NA
+                        query: NA,
+                        headers: NA,
+                        timestamp: NA,
+                        timestamp_ms: NA,
+                        body: NA
                     },
                     response: {
                         status_code: NA,
-                        body: NA,
-                        elapsed: 0
+                        timestamp: NA,
+                        timestamp_ms: NA,
+                        elapsed: 0,
+                        body: NA
                     }
                 })).eql(true);
             });
