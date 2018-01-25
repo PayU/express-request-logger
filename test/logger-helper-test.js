@@ -2,7 +2,6 @@
 
 var httpMocks = require('node-mocks-http'),
     loggerHelper = require('../lib/logger-helper'),
-    should = require('should'),
     _ = require('lodash'),
     utils = require('../lib/utils'),
     sinon = require('sinon');
@@ -17,7 +16,9 @@ var elapsed = endTime - startTime;
 var body = {
     body: 'body'
 };
-
+var params = {
+    param1: "123"
+};
 var query = {
     q1: 'something',
     q2: 'fishy'
@@ -34,6 +35,7 @@ describe('logger-helpers tests', function(){
         headers: {
             header1: 'some-value'
         },
+        url_params: params,
         timestamp: startTime.toISOString(),
         timestamp_ms: startTime.valueOf(),
         body: JSON.stringify(body),
@@ -59,6 +61,7 @@ describe('logger-helpers tests', function(){
             request = httpMocks.createRequest({
                 method: method,
                 url: url,
+                params: params,
                 query: query,
                 body: body,
                 headers: {
@@ -91,7 +94,7 @@ describe('logger-helpers tests', function(){
                 shouldAuditURLStub.returns(false);
 
                 loggerHelper.auditRequest(request, options);
-                should(loggerInfoStub.called).eql(false);
+                sinon.assert.notCalled(loggerInfoStub);
             });
         });
         describe('And shouldAuditURL returns true', function(){
@@ -99,15 +102,14 @@ describe('logger-helpers tests', function(){
                 shouldAuditURLStub.returns(true);
                 options.request.audit = true;
                 loggerHelper.auditRequest(request, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                //should(loggerInfoStub.calledWith({ request: undefined })).eql(true);
+                sinon.assert.calledOnce(loggerInfoStub);
             });
             it('Should not audit request if options.request.audit is false', function(){
                 shouldAuditURLStub.returns(true);
                 options.request.audit = false;
                 loggerHelper.auditRequest(request, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({ request: undefined })).eql(true);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: undefined });
             });
         });
         describe('And additionalAudit is not empty', function(){
@@ -126,8 +128,8 @@ describe('logger-helpers tests', function(){
                 shouldAuditURLStub.returns(true);
 
                 loggerHelper.auditRequest(request, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({ request: expectedAuditRequest, field1: 'field1', field2: 'field2' })).eql(true);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, field1: 'field1', field2: 'field2' });
             });
 
             it('Should not add to audit the additional audit details if its an empty object', function(){
@@ -138,8 +140,8 @@ describe('logger-helpers tests', function(){
                 shouldAuditURLStub.returns(true);
 
                 loggerHelper.auditRequest(request, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
             });
         });
         describe('And mask query params that are set to be masked', function(){
@@ -149,11 +151,11 @@ describe('logger-helpers tests', function(){
                 shouldAuditURLStub.returns(true);
 
                 loggerHelper.auditRequest(request, options);
-                should(loggerInfoStub.calledOnce).eql(true);
+                sinon.assert.calledOnce(loggerInfoStub);
 
                 let expected = _.cloneDeep(expectedAuditRequest)
                 expected.query[maskedQuery] = MASK;
-                should(loggerInfoStub.args[0]).eql([{ request: expected }]);
+                sinon.assert.calledWithMatch(loggerInfoStub, { request: expected });
 
                 // Clear created header for other tests
             });
@@ -164,12 +166,12 @@ describe('logger-helpers tests', function(){
                 shouldAuditURLStub.returns(true);
 
                 loggerHelper.auditRequest(request, options);
-                should(loggerInfoStub.calledOnce).eql(true);
+                sinon.assert.calledOnce(loggerInfoStub);
 
                 let expected = _.cloneDeep(expectedAuditRequest)
                 expected.query[maskedQuery1] = MASK;
                 expected.query[maskedQuery2] = MASK;
-                should(loggerInfoStub.args[0]).eql([{ request: expected }]);
+                sinon.assert.calledWith(loggerInfoStub, { request: expected });
             });
         })
         describe('And exclude headers contains an header to exclude', function(){
@@ -182,8 +184,8 @@ describe('logger-helpers tests', function(){
                 shouldAuditURLStub.returns(true);
 
                 loggerHelper.auditRequest(request, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
             });
             it('Should audit log without the specified headers, if there are moer than one', function(){
                 var anotherHeaderToExclude = 'another';
@@ -192,18 +194,18 @@ describe('logger-helpers tests', function(){
                 shouldAuditURLStub.returns(true);
 
                 loggerHelper.auditRequest(request, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
             });
             it('Should audit log with all headers, if exclude headers is an empty list', function(){
                 options.request.excludeHeaders = ['other-header'];
                 shouldAuditURLStub.returns(true);
 
                 loggerHelper.auditRequest(request, options);
-                should(loggerInfoStub.calledOnce).eql(true);
+                sinon.assert.calledOnce(loggerInfoStub);
 
                 expectedAuditRequest.headers[headerToExclude] = 'other-value';
-                should(loggerInfoStub.calledWith({ request: expectedAuditRequest })).eql(true);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
 
                 // Clear created header for other tests
                 delete expectedAuditRequest.headers[headerToExclude];
@@ -220,7 +222,8 @@ describe('logger-helpers tests', function(){
                 body: body,
                 headers: {
                     header1: 'some-value'
-                }
+                },
+                params: params
             });
 
             request.timestamp = startTime;
@@ -249,7 +252,7 @@ describe('logger-helpers tests', function(){
                 shouldAuditURLStub.returns(false);
 
                 loggerHelper.auditResponse(request, response, options);
-                should(loggerInfoStub.called).eql(false);
+                sinon.assert.notCalled(loggerInfoStub);
             });
         });
         describe('And shouldAuditURL returns true', function(){
@@ -258,44 +261,44 @@ describe('logger-helpers tests', function(){
                 options.request.audit = true;
                 clock.tick(elapsed);
                 loggerHelper.auditResponse(request, response, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
                     response: expectedAuditResponse
-                })).eql(true);
+                });
             });
             it('Should not audit request if options.request.audit is false', function(){
                 shouldAuditURLStub.returns(true);
                 options.request.audit = false;
                 clock.tick(elapsed);
                 loggerHelper.auditResponse(request, response, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
                     request: undefined,
                     response: expectedAuditResponse
-                })).eql(true);
+                });
             });
             it('Should audit response if options.response.audit is true', function(){
                 shouldAuditURLStub.returns(true);
                 options.response.audit = true;
                 clock.tick(elapsed);
                 loggerHelper.auditResponse(request, response, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
                     response: expectedAuditResponse
-                })).eql(true);
+                });
             });
             it('Should not audit response if options.response.audit is false', function(){
                 shouldAuditURLStub.returns(true);
                 options.response.audit = false;
                 clock.tick(elapsed);
                 loggerHelper.auditResponse(request, response, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
                     response: undefined
-                })).eql(true);
+                });
             });
             it('Should log empty values as N/A', function(){
                 request = undefined;
@@ -304,12 +307,13 @@ describe('logger-helpers tests', function(){
                 shouldAuditURLStub.returns(true);
                 clock.tick(elapsed);
                 loggerHelper.auditResponse(request, response, options);
-                should(loggerInfoStub.calledOnce).eql(true);
-                should(loggerInfoStub.calledWith({
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
                     request: {
                         method: NA,
                         url: NA,
                         query: NA,
+                        url_params: NA,
                         headers: NA,
                         timestamp: NA,
                         timestamp_ms: NA,
@@ -322,7 +326,7 @@ describe('logger-helpers tests', function(){
                         elapsed: 0,
                         body: NA
                     }
-                })).eql(true);
+                });
             });
         });
     });
