@@ -31,6 +31,7 @@ describe('logger-helpers tests', function(){
     var expectedAuditRequest = {
         method: method,
         url: url,
+        url_route: '/somepath/:id',
         query: query,
         headers: {
             header1: 'some-value'
@@ -61,6 +62,10 @@ describe('logger-helpers tests', function(){
             request = httpMocks.createRequest({
                 method: method,
                 url: url,
+                route: {
+                    path: '/:id'
+                },
+                baseUrl: '/somepath',
                 params: params,
                 query: query,
                 body: body,
@@ -218,6 +223,10 @@ describe('logger-helpers tests', function(){
             request = httpMocks.createRequest({
                 method: method,
                 url: url,
+                route: {
+                    path: '/:id'
+                },
+                baseUrl: '/somepath',
                 query: query,
                 body: body,
                 headers: {
@@ -256,6 +265,17 @@ describe('logger-helpers tests', function(){
             });
         });
         describe('And shouldAuditURL returns true', function(){
+            it('Should audit request if options.request.audit is true', function(){
+                shouldAuditURLStub.returns(true);
+                options.request.audit = true;
+                clock.tick(elapsed);
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    response: expectedAuditResponse
+                });
+            });
             it('Should audit request if options.request.audit is true', function(){
                 shouldAuditURLStub.returns(true);
                 options.request.audit = true;
@@ -312,6 +332,7 @@ describe('logger-helpers tests', function(){
                     request: {
                         method: NA,
                         url: NA,
+                        url_route: NA,
                         query: NA,
                         url_params: NA,
                         headers: NA,

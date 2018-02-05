@@ -18,14 +18,36 @@ describe('utils tests', function(){
             var url = utils.getUrl(request);
             should(url).eql(expectedPath);
         });
-        it('Should return url for a path with route', function(){
+        it('Should return url for a path - route doesn\'t change the url', function(){
             request.baseUrl = 'path';
             request.route = {
-                path: '/123'
+                path: '/:id'
             };
 
             var url = utils.getUrl(request);
             should(url).eql(expectedPath);
+        });
+        it('Should N/A for not valid req obj', function(){
+            var url = utils.getUrl(undefined);
+            should(url).eql('N/A');
+        });
+    });
+
+    describe('When calling getRoute', function(){
+        var request;
+        var expectedRoute = '/path/:id';
+        beforeEach(function(){
+            request = httpMocks.createRequest({
+                method: 'POST',
+                route: {
+                    path: '/:id'
+                },
+                baseUrl: '/path',
+            });
+        });
+        it('Should return url_route for a path', function(){
+            var url_route = utils.getRoute(request);
+            should(url_route).eql(expectedRoute);
         });
         it('Should N/A for not valid req obj', function(){
             var url = utils.getUrl(undefined);
