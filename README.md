@@ -104,10 +104,10 @@ app.use(audit({
 
 [npm-image]: https://img.shields.io/npm/v/express-requests-logger.svg?style=flat
 [npm-url]: https://npmjs.org/package/express-requests-logger
-[travis-image]: https://travis-ci.org/zooz/express-request-logger.svg?branch=master
-[travis-url]: https://travis-ci.org/zooz/express-request-logger
-[coveralls-image]: https://coveralls.io/repos/github/zooz/express-request-logger/badge.svg?branch=master
-[coveralls-url]: https://coveralls.io/github/zooz/express-request-logger?branch=master
+[travis-image]: https://travis-ci.org/Zooz/express-request-logger.svg?branch=master
+[travis-url]: https://travis-ci.org/Zooz/express-request-logger
+[coveralls-image]: https://coveralls.io/repos/github/Zooz/express-request-logger/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/Zooz/express-request-logger?branch=master
 [downloads-image]: http://img.shields.io/npm/dm/express-requests-logger.svg?style=flat
 [downloads-url]: https://npmjs.org/package/express-requests-logger
 [license-image]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
