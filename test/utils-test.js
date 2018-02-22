@@ -168,7 +168,7 @@ describe('utils tests', function(){
             var res = utils.shouldAuditURL(urls, request);
             should(res).eql(false);
         });
-        it.only('Should return false if url matches the route and not the req.url', () => {
+        it('Should return false if url matches the route and not the req.url', () => {
             request.url = '/';
             request.baseUrl = '/exclude';
             request.route = {
