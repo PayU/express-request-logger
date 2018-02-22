@@ -124,7 +124,7 @@ describe('utils tests', function(){
                         password: 'password to change'
                     }
                 ]
-            }
+            };
             let expectedJsonObj = {
                 password: expectedMaskedValue,
                 user: {
@@ -141,7 +141,7 @@ describe('utils tests', function(){
                         password: expectedMaskedValue
                     }
                 ]
-            }
+            };
             var masked = utils.maskJson(originalJsonObj, fieldsToMask);
             should(masked).eql(expectedJsonObj);
         });
@@ -166,6 +166,16 @@ describe('utils tests', function(){
         it('Should return false if one of the specified urls match the current path', function(){
             request.url = urlToExclude + '/123';
             var res = utils.shouldAuditURL(urls, request);
+            should(res).eql(false);
+        });
+        it.only('Should return false if url matches the route and not the req.url', () => {
+            request.url = '/';
+            request.baseUrl = '/exclude';
+            request.route = {
+                path: '/'
+            };
+            var res = utils.shouldAuditURL(urls, request);
+
             should(res).eql(false);
         });
     });
