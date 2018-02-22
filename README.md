@@ -3,6 +3,7 @@
 [![Test Coverage][coveralls-image]][coveralls-url]
 [![NPM Downloads][downloads-image]][downloads-url]
 [![MIT License][license-image]][license-url]
+[![NSP Status][nsp-image]][nsp-url]
 
 # express-request-logger
 Middleware for logging request/responses in Express apps
@@ -103,11 +104,13 @@ app.use(audit({
 
 [npm-image]: https://img.shields.io/npm/v/express-requests-logger.svg?style=flat
 [npm-url]: https://npmjs.org/package/express-requests-logger
-[travis-image]: https://travis-ci.org/ugolas/express-request-logger.svg?branch=master
-[travis-url]: https://travis-ci.org/ugolas/express-request-logger
-[coveralls-image]: https://coveralls.io/repos/github/ugolas/express-request-logger/badge.svg?branch=master
-[coveralls-url]: https://coveralls.io/github/ugolas/express-request-logger?branch=master
+[travis-image]: https://travis-ci.org/zooz/express-request-logger.svg?branch=master
+[travis-url]: https://travis-ci.org/zooz/express-request-logger
+[coveralls-image]: https://coveralls.io/repos/github/zooz/express-request-logger/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/zooz/express-request-logger?branch=master
 [downloads-image]: http://img.shields.io/npm/dm/express-requests-logger.svg?style=flat
 [downloads-url]: https://npmjs.org/package/express-requests-logger
-[license-image]: http://img.shields.io/badge/license-MIT-blue.svg?style=flat
-[license-url]: LICENSE
+[license-image]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+[license-url]: https://opensource.org/licenses/Apache-2.0
+[nsp-image]: https://nodesecurity.io/orgs/zooz/projects/ca2387c7-874c-4f5d-bd4e-0aa2874a1ae1/badge
+[nsp-url]: https://nodesecurity.io/orgs/zooz/projects/ca2387c7-874c-4f5d-bd4e-0aa2874a1ae1
