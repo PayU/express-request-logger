@@ -232,7 +232,7 @@ describe('logger-helpers tests', function(){
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
             });
-            it('Should audit log with body, when execludeBody was true', function(){
+            it('Should audit log without body, when execludeBody was true', function(){
                 options.request.excludeBody = true;
 
                 loggerHelper.auditRequest(request, options);
@@ -247,7 +247,7 @@ describe('logger-helpers tests', function(){
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
             });
-            it('Should audit log without body, when execludeBody true and there is not body', function(){
+            it('Should audit log without body, when execludeBody true and there is no body', function(){
                 options.request.excludeBody = true;
                 delete request.body;
                 loggerHelper.auditRequest(request, options);
@@ -408,7 +408,7 @@ describe('logger-helpers tests', function(){
                     request: expectedAuditRequest,
                     response: expectedAuditResponse});
             });
-            it('Should audit log with body, when execludeBody was true', function(){
+            it('Should audit log without body, when execludeBody was true', function(){
                 options.response.excludeBody = true;
 
                 loggerHelper.auditResponse(request, response, options);
@@ -427,7 +427,7 @@ describe('logger-helpers tests', function(){
                     request: expectedAuditRequest,
                     response: expectedAuditResponse});
             });
-            it('Should audit log without body, when execludeBody true and there is not body', function(){
+            it('Should audit log without body, when execludeBody true and there is no body', function(){
                 options.response.excludeBody = true;
                 delete response.body;
                 loggerHelper.auditResponse(request, response, options);
