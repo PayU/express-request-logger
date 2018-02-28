@@ -216,6 +216,46 @@ describe('logger-helpers tests', function(){
                 delete expectedAuditRequest.headers[headerToExclude];
             });
         });
+        describe('And exclude Body', function(){
+            beforeEach(function(){
+                shouldAuditURLStub.returns(true);
+            });
+
+            //reset options and expectedAuditRequest
+            afterEach(function(){
+                delete options.request.excludeBody;
+                expectedAuditRequest.body = JSON.stringify(body);
+            });
+
+            it('Should audit log with body, if no execludeBody was written in options', function(){
+                loggerHelper.auditRequest(request, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+            });
+            it('Should audit log with body, when execludeBody was true', function(){
+                options.request.excludeBody = true;
+
+                loggerHelper.auditRequest(request, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                expectedAuditRequest.body = NA;
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+            });
+            it('Should audit log with body, when execludeBody was false', function(){
+                options.request.excludeBody = false;
+
+                loggerHelper.auditRequest(request, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+            });
+            it('Should audit log without body, when execludeBody true and there is not body', function(){
+                options.request.excludeBody = true;
+                delete request.body;
+                loggerHelper.auditRequest(request, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                expectedAuditRequest.body = NA;
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+            });
+        });
     });
 
     describe('When calling auditResponse', function(){
@@ -348,6 +388,54 @@ describe('logger-helpers tests', function(){
                         body: NA
                     }
                 });
+            });
+        });
+        describe('And exclude Body', function(){
+            beforeEach(function(){
+                shouldAuditURLStub.returns(true);
+            });
+
+            //reset options and expectedAuditResponse
+            afterEach(function(){
+                delete options.response.excludeBody;
+                expectedAuditResponse.body = JSON.stringify(body);
+            });
+
+            it('Should audit log with body, if no execludeBody was written in options', function(){
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    response: expectedAuditResponse});
+            });
+            it('Should audit log with body, when execludeBody was true', function(){
+                options.response.excludeBody = true;
+
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                expectedAuditResponse.body = NA;
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    response: expectedAuditResponse});
+            });
+            it('Should audit log with body, when execludeBody was false', function(){
+                options.response.excludeBody = false;
+
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    response: expectedAuditResponse});
+            });
+            it('Should audit log without body, when execludeBody true and there is not body', function(){
+                options.response.excludeBody = true;
+                delete response.body;
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                expectedAuditResponse.body = NA;
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    response: expectedAuditResponse});
             });
         });
     });
