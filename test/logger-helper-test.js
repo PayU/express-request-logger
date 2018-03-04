@@ -27,31 +27,8 @@ var query = {
 
 describe('logger-helpers tests', function(){
     var sandbox, clock, loggerInfoStub, shouldAuditURLStub, loggerErrorStub;
-    var request, response, options;
+    var request, response, options, expectedAuditRequest, expectedAuditResponse;
 
-    var expectedAuditRequest = {
-        method: method,
-        url: url,
-        url_route: '/somepath/:id',
-        query: query,
-        headers: {
-            header1: 'some-value'
-        },
-        url_params: params,
-        timestamp: startTime.toISOString(),
-        timestamp_ms: startTime.valueOf(),
-        body: JSON.stringify(body),
-    };
-    var expectedAuditResponse = {
-        status_code: 200,
-        timestamp: endTime.toISOString(),
-        timestamp_ms: endTime.valueOf(),
-        elapsed: elapsed,
-        body: JSON.stringify(body),
-        headers: {
-            header2: 'some-other-value'
-        },
-    };
     before(function(){
         sandbox = sinon.sandbox.create();
         clock = sinon.useFakeTimers();
@@ -74,42 +51,65 @@ describe('logger-helpers tests', function(){
             },
             logger: {}
         };
+
+        request = httpMocks.createRequest({
+            method: method,
+            url: url,
+            route: {
+                path: '/:id'
+            },
+            baseUrl: '/somepath',
+            params: params,
+            query: query,
+            _body: body,
+            _headers: {
+                header1: 'some-value'
+            }
+        });
+
+        request.timestamp = startTime;
+        response = httpMocks.createResponse();
+        response._body = JSON.stringify(body);
+        response.timestamp = endTime;
+        response._headers = { "header2": 'some-other-value' };
+
+        options.logger.info = function(){};
+        options.logger.error = function(){};
+
+        loggerInfoStub = sandbox.stub(options.logger, 'info');
+        loggerErrorStub = sandbox.stub(options.logger, 'error');
+
+        expectedAuditRequest = {
+            method: method,
+            url: url,
+            url_route: '/somepath/:id',
+            query: query,
+            headers: {
+                header1: 'some-value'
+            },
+            url_params: params,
+            timestamp: startTime.toISOString(),
+            timestamp_ms: startTime.valueOf(),
+            body: JSON.stringify(body),
+        };
+        expectedAuditResponse = {
+            status_code: 200,
+            timestamp: endTime.toISOString(),
+            timestamp_ms: endTime.valueOf(),
+            elapsed: elapsed,
+            body: JSON.stringify(body),
+            headers: {
+                header2: 'some-other-value'
+            },
+        };
     });
 
     after(function(){
         sandbox.restore();
         clock.restore();
     });
+
     describe('When calling auditRequest', function(){
-        beforeEach(function(){
-            request = httpMocks.createRequest({
-                method: method,
-                url: url,
-                route: {
-                    path: '/:id'
-                },
-                baseUrl: '/somepath',
-                params: params,
-                query: query,
-                body: body,
-                headers: {
-                    header1: 'some-value'
-                }
-            });
-
-            request.timestamp = startTime;
-            response = httpMocks.createResponse();
-            response._body = JSON.stringify(body);
-            response.timestamp = endTime;
-            response.headers = { "header2": 'some-other-value' };
-
-            options.logger.info = function(){};
-            options.logger.error = function(){};
-
-            loggerInfoStub = sandbox.stub(options.logger, 'info');
-            loggerErrorStub = sandbox.stub(options.logger, 'error');
-
-        });
         afterEach(function(){
             utils.shouldAuditURL.reset();
         });
@@ -201,7 +201,7 @@ describe('logger-helpers tests', function(){
         describe('And exclude headers contains an header to exclude', function(){
             var headerToExclude = 'header-to-exclude';
             beforeEach(function(){
-                request.headers[headerToExclude] = 'other-value';
+                request._headers[headerToExclude] = 'other-value';
             });
             it('Should audit log without the specified header', function(){
                 options.request.excludeHeaders = [headerToExclude];
@@ -258,7 +258,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should audit log without body, when excludeBody with \'*\' and body is plain text', function(){
                 options.request.excludeBody = [ALL_BODY];
-                request.body = 'test';
+                request._body = 'test';
 
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -267,7 +267,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should audit log without body, when excludeBody by field and all body', function(){
                 options.request.excludeBody = ['field1', ALL_BODY];
-                request.body = { 'field1' : 1, 'field2' : 'test'};
+                request._body = { 'field1' : 1, 'field2' : 'test'};
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
@@ -275,7 +275,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should audit log body without specific field, when excludeBody by existing and unexisting field', function(){
                 options.request.excludeBody = ['field3', 'field1'];
-                request.body = { 'field1' : 1, 'field2' : 'test'};
+                request._body = { 'field1' : 1, 'field2' : 'test'};
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = JSON.stringify({'field2' : 'test'});
@@ -283,7 +283,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should audit log without body, when no body in request and excludeBody by field', function(){
                 options.request.excludeBody = ['field3', 'field1'];
-                delete request.body;
+                delete request._body;
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
@@ -292,7 +292,7 @@ describe('logger-helpers tests', function(){
 
             it('Should audit log without body, when body is number (not json)', function(){
                 options.request.excludeBody = ['field3', 'field1'];
-                request.body = 3;
+                request._body = 3;
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledOnce(loggerErrorStub);
@@ -302,7 +302,7 @@ describe('logger-helpers tests', function(){
 
             it('Should audit log without body, when body is string (not json)', function(){
                 options.request.excludeBody = ['field3', 'field1'];
-                request.body = "test";
+                request._body = "test";
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledOnce(loggerErrorStub);
@@ -313,7 +313,7 @@ describe('logger-helpers tests', function(){
             it('Should audit log without body, when body is json array', function(){
                 options.request.excludeBody = ['field3', 'field1'];
                 let newBody = ["a","b","c"];
-                request.body = _.cloneDeep(newBody);
+                request._body = _.cloneDeep(newBody);
                 expectedAuditRequest.body = JSON.stringify(newBody);
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -324,32 +324,6 @@ describe('logger-helpers tests', function(){
     });
 
         describe('When calling auditResponse', function(){
-        beforeEach(function(){
-            request = httpMocks.createRequest({
-                method: method,
-                url: url,
-                route: {
-                    path: '/:id'
-                },
-                baseUrl: '/somepath',
-                query: query,
-                body: body,
-                headers: {
-                    header1: 'some-value'
-                },
-                params: params
-            });
-
-            request.timestamp = startTime;
-            response = httpMocks.createResponse();
-            response._body = JSON.stringify(body);
-            response.timestamp = endTime;
-            response.headers = { "header2": 'some-other-value' };
-            options.logger.info = function(){};
-
-            loggerInfoStub = sandbox.stub(options.logger, 'info');
-
-        });
         afterEach(function(){
             utils.shouldAuditURL.reset();
         });
@@ -516,7 +490,7 @@ describe('logger-helpers tests', function(){
                 });
 
                 beforeEach(function(){
-                    response.headers[headerToExclude] = 'other-value';
+                    response._headers[headerToExclude] = 'other-value';
                 });
 
                 it('Should audit log without the specified header', function(){
@@ -529,7 +503,7 @@ describe('logger-helpers tests', function(){
                 it('Should audit log without the specified headers, if there are moer than one', function(){
                     var anotherHeaderToExclude = 'another';
                     options.response.excludeHeaders = [headerToExclude, anotherHeaderToExclude];
-                    response.headers[anotherHeaderToExclude] = 'some value';
+                    response._headers[anotherHeaderToExclude] = 'some value';
 
                     loggerHelper.auditResponse(request, response, options);
                     sinon.assert.calledOnce(loggerInfoStub);
