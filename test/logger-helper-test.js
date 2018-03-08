@@ -61,8 +61,8 @@ describe('logger-helpers tests', function(){
             baseUrl: '/somepath',
             params: params,
             query: query,
-            _body: body,
-            _headers: {
+            body: body,
+            headers: {
                 header1: 'some-value'
             }
         });
@@ -71,7 +71,7 @@ describe('logger-helpers tests', function(){
         response = httpMocks.createResponse();
         response._body = JSON.stringify(body);
         response.timestamp = endTime;
-        response._headers = { "header2": 'some-other-value' };
+        response.headers = { "header2": 'some-other-value' };
 
         options.logger.info = function(){};
         options.logger.warn = function(){};
@@ -201,7 +201,7 @@ describe('logger-helpers tests', function(){
         describe('And exclude headers contains an header to exclude', function(){
             var headerToExclude = 'header-to-exclude';
             beforeEach(function(){
-                request._headers[headerToExclude] = 'other-value';
+                request.headers[headerToExclude] = 'other-value';
             });
             it('Should audit log without the specified header', function(){
                 options.request.excludeHeaders = [headerToExclude];
@@ -258,7 +258,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should audit log without body, when excludeBody with \'*\' and body is plain text', function(){
                 options.request.excludeBody = [ALL_BODY];
-                request._body = 'test';
+                request.body = 'test';
 
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -267,7 +267,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should audit log without body, when excludeBody by field and all body', function(){
                 options.request.excludeBody = ['field1', ALL_BODY];
-                request._body = { 'field1' : 1, 'field2' : 'test'};
+                request.body = { 'field1' : 1, 'field2' : 'test'};
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
@@ -275,7 +275,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should audit log body without specific field, when excludeBody by existing and unexisting field', function(){
                 options.request.excludeBody = ['field3', 'field1'];
-                request._body = { 'field1' : 1, 'field2' : 'test'};
+                request.body = { 'field1' : 1, 'field2' : 'test'};
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = JSON.stringify({'field2' : 'test'});
@@ -283,7 +283,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should audit log without body, when no body in request and excludeBody by field', function(){
                 options.request.excludeBody = ['field3', 'field1'];
-                delete request._body;
+                delete request.body;
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
@@ -292,7 +292,7 @@ describe('logger-helpers tests', function(){
 
             it('Should audit log without body, when body is number (not json)', function(){
                 options.request.excludeBody = ['field3', 'field1'];
-                request._body = 3;
+                request.body = 3;
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledOnce(loggerWarnStub);
@@ -302,7 +302,7 @@ describe('logger-helpers tests', function(){
 
             it('Should audit log without body, when body is string (not json)', function(){
                 options.request.excludeBody = ['field3', 'field1'];
-                request._body = "test";
+                request.body = "test";
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledOnce(loggerWarnStub);
@@ -313,7 +313,7 @@ describe('logger-helpers tests', function(){
             it('Should audit log without body, when body is json array', function(){
                 options.request.excludeBody = ['field3', 'field1'];
                 let newBody = ["a","b","c"];
-                request._body = _.cloneDeep(newBody);
+                request.body = _.cloneDeep(newBody);
                 expectedAuditRequest.body = JSON.stringify(newBody);
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -447,7 +447,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should audit log without body, when excludeBody with \'*\' and body is plain text', function(){
                 options.response.excludeBody = [ALL_BODY];
-                response._body = 'test';
+                response.body = 'test';
 
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -490,7 +490,7 @@ describe('logger-helpers tests', function(){
                 });
 
                 beforeEach(function(){
-                    response._headers[headerToExclude] = 'other-value';
+                    response.headers[headerToExclude] = 'other-value';
                 });
 
                 it('Should audit log without the specified header', function(){
@@ -503,7 +503,7 @@ describe('logger-helpers tests', function(){
                 it('Should audit log without the specified headers, if there are moer than one', function(){
                     var anotherHeaderToExclude = 'another';
                     options.response.excludeHeaders = [headerToExclude, anotherHeaderToExclude];
-                    response._headers[anotherHeaderToExclude] = 'some value';
+                    response.headers[anotherHeaderToExclude] = 'some value';
 
                     loggerHelper.auditResponse(request, response, options);
                     sinon.assert.calledOnce(loggerInfoStub);
