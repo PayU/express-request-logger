@@ -26,7 +26,7 @@ var query = {
 }
 
 describe('logger-helpers tests', function(){
-    var sandbox, clock, loggerInfoStub, shouldAuditURLStub, loggerErrorStub;
+    var sandbox, clock, loggerInfoStub, shouldAuditURLStub, loggerWarnStub;
     var request, response, options, expectedAuditRequest, expectedAuditResponse;
 
     before(function(){
@@ -74,10 +74,10 @@ describe('logger-helpers tests', function(){
         response._headers = { "header2": 'some-other-value' };
 
         options.logger.info = function(){};
-        options.logger.error = function(){};
+        options.logger.warn = function(){};
 
         loggerInfoStub = sandbox.stub(options.logger, 'info');
-        loggerErrorStub = sandbox.stub(options.logger, 'error');
+        loggerWarnStub = sandbox.stub(options.logger, 'warn');
 
         expectedAuditRequest = {
             method: method,
@@ -295,7 +295,7 @@ describe('logger-helpers tests', function(){
                 request._body = 3;
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledOnce(loggerErrorStub);
+                sinon.assert.calledOnce(loggerWarnStub);
                 expectedAuditRequest.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
             });
@@ -305,7 +305,7 @@ describe('logger-helpers tests', function(){
                 request._body = "test";
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledOnce(loggerErrorStub);
+                sinon.assert.calledOnce(loggerWarnStub);
                 expectedAuditRequest.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
             });
@@ -317,7 +317,7 @@ describe('logger-helpers tests', function(){
                 expectedAuditRequest.body = JSON.stringify(newBody);
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.notCalled(loggerErrorStub);
+                sinon.assert.notCalled(loggerWarnStub);
                 sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
             });
         });
