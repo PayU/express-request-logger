@@ -35,7 +35,6 @@
   },
   "dependencies": {
     "bunyan": "^1.8.5",
-    "rewire": "^2.5.2",
     "lodash": "^4.17.5"
   }
 }
