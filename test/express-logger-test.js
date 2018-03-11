@@ -1,6 +1,7 @@
 'use strict';
 
-var expressLogger = require('../lib/express-logger'),
+var  rewire = require('rewire'),
+    expressLogger = rewire('../lib/express-logger'),
     httpMocks = require('node-mocks-http'),
     loggerHelper = require('../lib/logger-helper'),
     sinon = require('sinon'),
@@ -38,6 +39,52 @@ describe('express-logger tests', function(){
         loggerHelper.auditResponse.restore();
     });
     describe('When calling express-logger module', function(){
+        it('should correctly setup in case of wrong options', function(){
+            let options = {
+                request: {
+                    audit: false,
+                    maskBody: 10,
+                    excludeBody: 's',
+                    excludeHeaders: 2,
+                    maskHeaders: 3
+                },
+                response: {
+                    audit: false,
+                    maskBody: false,
+                    excludeBody: 't',
+                    excludeHeaders: 'd',
+                    maskHeaders: 2
+                },
+                doubleAudit: true,
+                excludeURLs: 'a'
+            };
+
+             let expectedOptions = {
+                    request: {
+                        audit: false,
+                        maskBody: [10],
+                        maskQuery: [],
+                        excludeBody: ['s'],
+                        excludeHeaders: [2],
+                        maskHeaders: [3]
+                    },
+                    response: {
+                        audit: false,
+                        maskBody: [false],
+                        excludeBody: ['t'],
+                        excludeHeaders: ['d'],
+                        maskHeaders: [2]
+                    },
+                    doubleAudit: true,
+                    excludeURLs: ['a']
+                };
+
+            expressLogger(options);
+            let convertedOptions = expressLogger.__get__('setupOptions');
+           delete convertedOptions.logger;
+           (convertedOptions).should.containEql(expectedOptions);
+
+        });
         it('should audit response and call next', function(){
             var auditMethod = expressLogger();
             // Start request

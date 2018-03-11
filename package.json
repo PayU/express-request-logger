@@ -29,11 +29,13 @@
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "node-mocks-http": "^1.5.6",
+    "rewire": "^3.0.2",
     "should": "^11.1.2",
     "sinon": "^1.17.7"
   },
   "dependencies": {
     "bunyan": "^1.8.5",
-    "lodash": "^4.17.4"
+    "flat": "^4.0.0",
+    "lodash": "^4.17.5"
   }
 }

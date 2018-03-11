@@ -12,8 +12,11 @@ Middleware for logging request/responses in Express apps
 - Logging request
 - Logging response
 - Mask request body fields
-- Exclude logging specific headers
+- Exclude request body fields
+- Exclude request specific headers
 - Mask response body fields
+- Exclude response body fields
+- Exclude response specific headers
 - Exclude specific URLs from logging
 
 ## Installation
@@ -63,6 +66,12 @@ Specific configuration for requests
 ##### audit
 
 Boolean - `true` - include request in audit, `false` - don't.
+
+##### excludeBody
+
+Array of strings - pass the fields you wish to exclude in the body of the requests (sensitive data like passwords, credit cards numbers etc..).
+`*` field - exclude all body
+
 ##### maskBody
 
 Array of strings - pass the fields you wish to mask in the body of the requests (sensitive data like passwords, credit cards numbers etc..).
@@ -73,6 +82,11 @@ Array of strings - pass the fields you wish to mask in the query of the requests
 ##### excludeHeaders
 
 Array of strings - pass the header names you wish to exclude from the audit (senstitive data like authorization headers etc..).
+`*` field - exclude all headers
+
+##### maskHeaders
+
+Array of strings - pass the fields you wish to mask in the headers of the requests (senstitive data like authorization headers etc..).
 
 #### response
 
@@ -82,9 +96,24 @@ Specific configuration for responses
 
 Boolean - `true` - include response in audit, `false` - don't.
 
+##### excludeBody
+
+Array of strings - pass the fields you wish to exclude in the body of the responses (sensitive data like passwords, credit cards numbers etc..).
+`*` field - exclude all body
+
 ##### maskBody
 
 Array of strings - pass the fields you wish to mask in the body of the responses (sensitive data like passwords, credit cards numbers etc..).
+
+##### excludeHeaders
+
+Array of strings - pass the header names you wish to exclude from the audit (senstitive data like authorization headers etc..).
+`*` field - exclude all headers
+
+##### maskHeaders
+
+Array of strings - pass the fields you wish to mask in the headers of the responses (senstitive data like authorization headers etc..).
+
 
 ### Example
 
@@ -94,10 +123,15 @@ app.use(audit({
     excludeURLs: [‘health’, ‘metrics’], // Exclude paths which enclude 'health' & 'metrics'
     request: {
         maskBody: [‘password’], // Mask 'password' field in incoming requests
-        excludeHeaders: [‘authorization’] // Exclude 'authorization' header from requests
+        excludeHeaders: [‘authorization’], // Exclude 'authorization' header from requests
+        excludeBody: [‘creditCard’] // Exclude 'creditCard' field from requests body
+        maskHeaders: [‘header1’], // Mask 'header1' header in incoming requests
     },
     response: {
         maskBody: [‘session_token’] // Mask 'session_token' field in response body
+        excludeHeaders: [‘*’] // Exclude all headers from responses,
+        excludeBody: [‘*’] // Exclude all body from responses
+        maskHeaders: [‘header1’], // Mask 'header1' header in incoming requests
     }
 }));
 ```
