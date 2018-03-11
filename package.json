@@ -3,26 +3,9 @@
   "version": "1.0.15",
   "description": "Middleware for logging request/responses in Express apps",
   "main": "index.js",
-  "nyc": {
-    "check-coverage": true,
-    "lines": 80,
-    "statements": 80,
-    "functions": 80,
-    "branches": 80,
-    "include": [
-      "lib/*.js"
-    ],
-    "reporter": [
-      "text",
-      "html"
-    ],
-    "cache": true,
-    "all": true,
-    "report-dir": "./coverage"
-  },
   "scripts": {
-    "test": "nyc node_modules/.bin/_mocha  ./test/ --recursive",
-    "test-travis": "nyc node_modules/.bin/_mocha  ./test/ --recursive",
+    "test": "./node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- --recursive ./test/*-test.js",
+    "test-travis": "./node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --recursive --reporter spec --check-leaks test/",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
   "repository": {
@@ -46,13 +29,13 @@
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "node-mocks-http": "^1.5.6",
-    "nyc": "^11.4.1",
     "rewire": "^3.0.2",
     "should": "^11.1.2",
     "sinon": "^1.17.7"
   },
   "dependencies": {
     "bunyan": "^1.8.5",
+    "flat": "^4.0.0",
     "lodash": "^4.17.5"
   }
 }
