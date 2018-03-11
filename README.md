@@ -12,8 +12,11 @@ Middleware for logging request/responses in Express apps
 - Logging request
 - Logging response
 - Mask request body fields
-- Exclude logging specific headers
+- Exclude request body fields
+- Exclude request specific headers
 - Mask response body fields
+- Exclude response body fields
+- Exclude response specific headers
 - Exclude specific URLs from logging
 
 ## Installation
@@ -63,6 +66,12 @@ Specific configuration for requests
 ##### audit
 
 Boolean - `true` - include request in audit, `false` - don't.
+
+##### excludeBody
+
+Array of strings - pass the fields you wish to exclude in the body of the requests (sensitive data like passwords, credit cards numbers etc..).
+`*` field - exclude all body
+
 ##### maskBody
 
 Array of strings - pass the fields you wish to mask in the body of the requests (sensitive data like passwords, credit cards numbers etc..).
@@ -82,9 +91,18 @@ Specific configuration for responses
 
 Boolean - `true` - include response in audit, `false` - don't.
 
+##### excludeBody
+
+Array of strings - pass the fields you wish to exclude in the body of the responses (sensitive data like passwords, credit cards numbers etc..).
+`*` field - exclude all body
+
 ##### maskBody
 
 Array of strings - pass the fields you wish to mask in the body of the responses (sensitive data like passwords, credit cards numbers etc..).
+
+##### excludeHeaders
+
+Array of strings - pass the header names you wish to exclude from the audit (senstitive data like authorization headers etc..).
 
 ### Example
 
@@ -94,10 +112,13 @@ app.use(audit({
     excludeURLs: [‘health’, ‘metrics’], // Exclude paths which enclude 'health' & 'metrics'
     request: {
         maskBody: [‘password’], // Mask 'password' field in incoming requests
-        excludeHeaders: [‘authorization’] // Exclude 'authorization' header from requests
+        excludeHeaders: [‘authorization’], // Exclude 'authorization' header from requests
+        excludeBody: [‘creditCard’] // Exclude 'creditCard' field from requests body
     },
     response: {
         maskBody: [‘session_token’] // Mask 'session_token' field in response body
+        excludeHeaders: [‘content-type’] // Exclude 'authorization' header from responses,
+        excludeBody: [‘*’] // Exclude all body from responses
     }
 }));
 ```
