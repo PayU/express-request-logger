@@ -45,13 +45,15 @@ describe('express-logger tests', function(){
                     audit: false,
                     maskBody: 10,
                     excludeBody: 's',
-                    excludeHeaders: 2
+                    excludeHeaders: 2,
+                    maskHeaders: 3
                 },
                 response: {
                     audit: false,
                     maskBody: false,
                     excludeBody: 't',
-                    excludeHeaders: 'd'
+                    excludeHeaders: 'd',
+                    maskHeaders: 2
                 },
                 doubleAudit: true,
                 excludeURLs: 'a'
@@ -63,13 +65,15 @@ describe('express-logger tests', function(){
                         maskBody: [10],
                         maskQuery: [],
                         excludeBody: ['s'],
-                        excludeHeaders: [2]
+                        excludeHeaders: [2],
+                        maskHeaders: [3]
                     },
                     response: {
                         audit: false,
                         maskBody: [false],
                         excludeBody: ['t'],
-                        excludeHeaders: ['d']
+                        excludeHeaders: ['d'],
+                        maskHeaders: [2]
                     },
                     doubleAudit: true,
                     excludeURLs: ['a']

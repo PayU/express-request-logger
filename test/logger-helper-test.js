@@ -9,7 +9,7 @@ var httpMocks = require('node-mocks-http'),
 
 var NA = 'N/A';
 var MASK = 'XXXXX';
-var ALL_BODY = '*';
+var ALL_FIELDS = '*';
 var method = 'POST';
 var url = 'somepath/123';
 var startTime = new Date();
@@ -253,7 +253,7 @@ describe('logger-helpers tests', function(){
                 sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
             });
             it('Should audit log without body, when excludeBody with \'*\'', function(){
-                options.request.excludeBody = [ALL_BODY];
+                options.request.excludeBody = [ALL_FIELDS];
                 let prevBody = _.cloneDeep(request.body);
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -263,7 +263,7 @@ describe('logger-helpers tests', function(){
 
             });
             it('Should audit log without body, when excludeBody with \'*\' and body is plain text', function(){
-                options.request.excludeBody = [ALL_BODY];
+                options.request.excludeBody = [ALL_FIELDS];
                 request.body = 'test';
 
                 loggerHelper.auditRequest(request, options);
@@ -272,7 +272,7 @@ describe('logger-helpers tests', function(){
                 sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
             });
             it('Should audit log without body, when excludeBody by field and all body', function(){
-                options.request.excludeBody = ['field1', ALL_BODY];
+                options.request.excludeBody = ['field1', ALL_FIELDS];
                 request.body = { 'field1' : 1, 'field2' : 'test'};
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -451,7 +451,7 @@ describe('logger-helpers tests', function(){
                     response: expectedAuditResponse });
             });
             it('Should audit log without body, when excludeBody with \'*\'', function(){
-                options.response.excludeBody = [ALL_BODY];
+                options.response.excludeBody = [ALL_FIELDS];
                 let prevBody = _.cloneDeep(response.body);
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -461,7 +461,7 @@ describe('logger-helpers tests', function(){
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
             it('Should audit log without body, when excludeBody with \'*\' and body is plain text', function(){
-                options.response.excludeBody = [ALL_BODY];
+                options.response.excludeBody = [ALL_FIELDS];
                 response.body = 'test';
                 let prevBody = _.cloneDeep(response.body);
                 loggerHelper.auditResponse(request, response, options);
@@ -472,7 +472,7 @@ describe('logger-helpers tests', function(){
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
             it('Should audit log without body, when excludeBody by field and all body', function(){
-                options.response.excludeBody = ['field1', ALL_BODY];
+                options.response.excludeBody = ['field1', ALL_FIELDS];
                 response._body = JSON.stringify({ 'field1' : 1, 'field2' : 'test'});
                 let prevBody = _.cloneDeep(response.body);
                 loggerHelper.auditResponse(request, response, options);
@@ -525,6 +525,17 @@ describe('logger-helpers tests', function(){
 
                     should.deepEqual(response.headers, prevHeaders, 'headers of response change');
                 });
+                it('Should audit log without all headers', function(){
+                    options.response.excludeHeaders = [ALL_FIELDS];
+                    let prevHeaders = _.cloneDeep(response.headers);
+                    loggerHelper.auditResponse(request, response, options);
+                    expectedAuditResponse.headers = NA;
+                    sinon.assert.calledOnce(loggerInfoStub);
+                    sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                        response: expectedAuditResponse });
+
+                    should.deepEqual(response.headers, prevHeaders, 'headers of response change');
+                });
                 it('Should audit log without the specified headers, if there are more than one', function(){
                     var anotherHeaderToExclude = 'another';
                     options.response.excludeHeaders = [headerToExclude, anotherHeaderToExclude];
@@ -551,7 +562,30 @@ describe('logger-helpers tests', function(){
                     delete expectedAuditResponse.headers[headerToExclude];
                 });
             });
+        describe('And mask Body', function(){
+                before(function(){
+                    shouldAuditURLStub.returns(true);
+                });
 
-        });
+                afterEach(function(){
+                    expectedAuditResponse.body = JSON.stringify(body);
+                });
+                it('Should audit log with body, if mask body specific field', function(){
+                        options.response.maskBody = ['test1'];
+                        let newBody = {
+                            body: 'body',
+                            test1: 'test2'
+                        };
+                        response._body = _.cloneDeep(newBody);
+                        let prevBody = _.cloneDeep(response.body);
+                        loggerHelper.auditResponse(request, response, options);
+                        sinon.assert.calledOnce(loggerInfoStub);
+                        newBody.test1 = MASK;
+                        expectedAuditResponse.body = JSON.stringify(newBody);
+                        sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                            response: expectedAuditResponse });
+                        should.deepEqual(response.body, prevBody, 'body of resopnse change');
+                    });
+                });});
 
 });
