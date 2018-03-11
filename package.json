@@ -30,8 +30,7 @@
     "mocha": "^3.2.0",
     "node-mocks-http": "^1.5.6",
     "should": "^11.1.2",
-    "sinon": "^1.17.7",
-    "flat": "^4.0.0"
+    "sinon": "^1.17.7"
   },
   "dependencies": {
     "bunyan": "^1.8.5",
