@@ -70,6 +70,7 @@ describe('logger-helpers tests', function(){
 
         request.timestamp = startTime;
         response = httpMocks.createResponse();
+        response.getHeaders = () => { return response.headers};
         response._body = JSON.stringify(body);
         response.timestamp = endTime;
         response.headers = { "header2": 'some-other-value' };
