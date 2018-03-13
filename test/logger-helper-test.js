@@ -408,7 +408,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should log empty values as N/A', function(){
                 request = undefined;
-                response = undefined;
+                response = {getHeaders : ()=>{} };
 
                 shouldAuditURLStub.returns(true);
                 clock.tick(elapsed);
