@@ -70,10 +70,10 @@ describe('logger-helpers tests', function(){
 
         request.timestamp = startTime;
         response = httpMocks.createResponse();
-        response.getHeaders = () => { return response.headers};
         response._body = JSON.stringify(body);
         response.timestamp = endTime;
         response.headers = { "header2": 'some-other-value' };
+        response._headers = response.headers;
 
         options.logger.info = function(){};
         options.logger.warn = function(){};
@@ -408,7 +408,7 @@ describe('logger-helpers tests', function(){
             });
             it('Should log empty values as N/A', function(){
                 request = undefined;
-                response = {getHeaders : ()=>{} };
+                response = {_headers :{} };
 
                 shouldAuditURLStub.returns(true);
                 clock.tick(elapsed);
