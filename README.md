@@ -92,6 +92,8 @@ Array of strings - pass the fields you wish to mask in the headers of the reques
 
 Specific configuration for responses
 
+**Doesn't print headers for Node below v6.9.2**
+
 ##### audit
 
 Boolean - `true` - include response in audit, `false` - don't.
