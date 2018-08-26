@@ -608,6 +608,47 @@ describe('logger-helpers tests', function(){
                     response: expectedAuditResponse });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
+            it('Should not mask body if no headers', () => {
+                options.response.maskBody = ['test1'];
+                let newBody = {
+                    body: 'body',
+                    test1: 'test2'
+                };
+                response.headers = undefined;
+                response._headers = undefined;
+                response._body = _.cloneDeep(newBody);
+                let prevBody = _.cloneDeep(response.body);
+
+                loggerHelper.auditResponse(request, response, options);
+
+                expectedAuditResponse.body = JSON.stringify(newBody);
+
+                expectedAuditResponse.headers = NA;
+
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                    response: expectedAuditResponse });
+                should.deepEqual(response.body, prevBody, 'body of resopnse change');
+            });
+            it('Should not mask body if no content type header', () => {
+                options.response.maskBody = ['test1'];
+                let newBody = {
+                    body: 'body',
+                    test1: 'test2'
+                };
+                response.headers['content-type'] = undefined;
+                response._headers['content-type'] = undefined;
+                response._body = _.cloneDeep(newBody);
+                let prevBody = _.cloneDeep(response.body);
+
+                loggerHelper.auditResponse(request, response, options);
+
+                expectedAuditResponse.body = JSON.stringify(newBody);
+                expectedAuditResponse.headers['content-type'] = undefined;
+
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                    response: expectedAuditResponse });
+                should.deepEqual(response.body, prevBody, 'body of resopnse change');
+            });
         });
     });
 });
