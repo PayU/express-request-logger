@@ -94,6 +94,8 @@ Specific configuration for responses
 
 **Doesn't print headers for Node below v6.9.2**
 
+**Non JSON responses are not masked, and are logged as is. This is deducted from the response header `content-type`**
+
 ##### audit
 
 Boolean - `true` - include response in audit, `false` - don't.
