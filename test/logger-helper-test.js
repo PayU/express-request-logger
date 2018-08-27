@@ -19,12 +19,12 @@ var body = {
     body: 'body'
 };
 var params = {
-    param1: "123"
+    param1: '123'
 };
 var query = {
     q1: 'something',
     q2: 'fishy'
-}
+};
 
 describe('logger-helpers tests', function(){
     var sandbox, clock, loggerInfoStub, shouldAuditURLStub, loggerWarnStub;
@@ -72,7 +72,7 @@ describe('logger-helpers tests', function(){
         response = httpMocks.createResponse();
         response._body = JSON.stringify(body);
         response.timestamp = endTime;
-        response.headers = { "header2": 'some-other-value' };
+        response.headers = { 'header2': 'some-other-value', 'content-type': 'application/json' };
         response._headers = response.headers;
 
         options.logger.info = function(){};
@@ -101,7 +101,8 @@ describe('logger-helpers tests', function(){
             elapsed: elapsed,
             body: JSON.stringify(body),
             headers: {
-                header2: 'some-other-value'
+                header2: 'some-other-value',
+                'content-type': 'application/json'
             },
         };
     });
@@ -172,34 +173,34 @@ describe('logger-helpers tests', function(){
         });
         describe('And mask query params that are set to be masked', function(){
             it('Should mask the query param', function(){
-                var maskedQuery = 'q1'
+                var maskedQuery = 'q1';
                 options.request.maskQuery = [maskedQuery];
                 shouldAuditURLStub.returns(true);
 
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
 
-                let expected = _.cloneDeep(expectedAuditRequest)
+                let expected = _.cloneDeep(expectedAuditRequest);
                 expected.query[maskedQuery] = MASK;
                 sinon.assert.calledWithMatch(loggerInfoStub, { request: expected });
 
                 // Clear created header for other tests
             });
             it('Should mask all query params', function(){
-                var maskedQuery1 = 'q1'
-                var maskedQuery2 = 'q2'
+                var maskedQuery1 = 'q1';
+                var maskedQuery2 = 'q2';
                 options.request.maskQuery = [maskedQuery1, maskedQuery2];
                 shouldAuditURLStub.returns(true);
 
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
 
-                let expected = _.cloneDeep(expectedAuditRequest)
+                let expected = _.cloneDeep(expectedAuditRequest);
                 expected.query[maskedQuery1] = MASK;
                 expected.query[maskedQuery2] = MASK;
                 sinon.assert.calledWith(loggerInfoStub, { request: expected });
             });
-        })
+        });
         describe('And exclude headers contains an header to exclude', function(){
             var headerToExclude = 'header-to-exclude';
             beforeEach(function(){
@@ -313,7 +314,7 @@ describe('logger-helpers tests', function(){
 
             it('Should audit log without body, when body is string (not json)', function(){
                 options.request.excludeBody = ['field3', 'field1'];
-                request.body = "test";
+                request.body = 'test';
                 let prevBody = _.cloneDeep(request.body);
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -325,7 +326,7 @@ describe('logger-helpers tests', function(){
 
             it('Should audit log without body, when body is json array', function(){
                 options.request.excludeBody = ['field3', 'field1'];
-                let newBody = ["a","b","c"];
+                let newBody = ['a','b','c'];
                 request.body = _.cloneDeep(newBody);
                 expectedAuditRequest.body = JSON.stringify(newBody);
                 let prevBody = _.cloneDeep(request.body);
@@ -338,7 +339,7 @@ describe('logger-helpers tests', function(){
         });
     });
 
-        describe('When calling auditResponse', function(){
+    describe('When calling auditResponse', function(){
         afterEach(function(){
             utils.shouldAuditURL.reset();
         });
@@ -507,86 +508,147 @@ describe('logger-helpers tests', function(){
             });
         });
         describe('And exclude headers contains an header to exclude', function(){
-                var headerToExclude = 'header-to-exclude';
-                before(() => {
-                    shouldAuditURLStub.returns(true);
-                });
-
-                beforeEach(function(){
-                    response.headers[headerToExclude] = 'other-value';
-                });
-
-                it('Should audit log without the specified header', function(){
-                    options.response.excludeHeaders = [headerToExclude];
-                    let prevHeaders = _.cloneDeep(response.headers);
-                    loggerHelper.auditResponse(request, response, options);
-                    sinon.assert.calledOnce(loggerInfoStub);
-                    sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
-                        response: expectedAuditResponse });
-
-                    should.deepEqual(response.headers, prevHeaders, 'headers of response change');
-                });
-                it('Should audit log without all headers', function(){
-                    options.response.excludeHeaders = [ALL_FIELDS];
-                    let prevHeaders = _.cloneDeep(response.headers);
-                    loggerHelper.auditResponse(request, response, options);
-                    expectedAuditResponse.headers = NA;
-                    sinon.assert.calledOnce(loggerInfoStub);
-                    sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
-                        response: expectedAuditResponse });
-
-                    should.deepEqual(response.headers, prevHeaders, 'headers of response change');
-                });
-                it('Should audit log without the specified headers, if there are more than one', function(){
-                    var anotherHeaderToExclude = 'another';
-                    options.response.excludeHeaders = [headerToExclude, anotherHeaderToExclude];
-                    response.headers[anotherHeaderToExclude] = 'some value';
-
-                    let prevHeaders = _.cloneDeep(response.headers);
-                    loggerHelper.auditResponse(request, response, options);
-                    sinon.assert.calledOnce(loggerInfoStub);
-                    sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
-                        response: expectedAuditResponse });
-
-                    should.deepEqual(response.headers, prevHeaders, 'headers of response change');
-                });
-                it('Should audit log with all headers, if exclude headers is an empty list', function(){
-                    options.response.excludeHeaders = ['other-header'];
-
-                    loggerHelper.auditResponse(request, response, options);
-                    sinon.assert.calledOnce(loggerInfoStub);
-
-                    expectedAuditResponse.headers[headerToExclude] = 'other-value';
-                    sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
-                        response: expectedAuditResponse });
-                    // Clear created header for other tests
-                    delete expectedAuditResponse.headers[headerToExclude];
-                });
+            var headerToExclude = 'header-to-exclude';
+            before(() => {
+                shouldAuditURLStub.returns(true);
             });
+
+            beforeEach(function(){
+                response.headers[headerToExclude] = 'other-value';
+            });
+
+            it('Should audit log without the specified header', function(){
+                options.response.excludeHeaders = [headerToExclude];
+                let prevHeaders = _.cloneDeep(response.headers);
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                    response: expectedAuditResponse });
+
+                should.deepEqual(response.headers, prevHeaders, 'headers of response change');
+            });
+            it('Should audit log without all headers', function(){
+                options.response.excludeHeaders = [ALL_FIELDS];
+                let prevHeaders = _.cloneDeep(response.headers);
+                loggerHelper.auditResponse(request, response, options);
+                expectedAuditResponse.headers = NA;
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                    response: expectedAuditResponse });
+
+                should.deepEqual(response.headers, prevHeaders, 'headers of response change');
+            });
+            it('Should audit log without the specified headers, if there are more than one', function(){
+                var anotherHeaderToExclude = 'another';
+                options.response.excludeHeaders = [headerToExclude, anotherHeaderToExclude];
+                response.headers[anotherHeaderToExclude] = 'some value';
+
+                let prevHeaders = _.cloneDeep(response.headers);
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                    response: expectedAuditResponse });
+
+                should.deepEqual(response.headers, prevHeaders, 'headers of response change');
+            });
+            it('Should audit log with all headers, if exclude headers is an empty list', function(){
+                options.response.excludeHeaders = ['other-header'];
+
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+
+                expectedAuditResponse.headers[headerToExclude] = 'other-value';
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                    response: expectedAuditResponse });
+                    // Clear created header for other tests
+                delete expectedAuditResponse.headers[headerToExclude];
+            });
+        });
         describe('And mask Body', function(){
-                before(function(){
-                    shouldAuditURLStub.returns(true);
-                });
+            before(function(){
+                shouldAuditURLStub.returns(true);
+            });
 
-                afterEach(function(){
-                    expectedAuditResponse.body = JSON.stringify(body);
-                });
-                it('Should audit log with body, if mask body specific field', function(){
-                        options.response.maskBody = ['test1'];
-                        let newBody = {
-                            body: 'body',
-                            test1: 'test2'
-                        };
-                        response._body = _.cloneDeep(newBody);
-                        let prevBody = _.cloneDeep(response.body);
-                        loggerHelper.auditResponse(request, response, options);
-                        sinon.assert.calledOnce(loggerInfoStub);
-                        newBody.test1 = MASK;
-                        expectedAuditResponse.body = JSON.stringify(newBody);
-                        sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
-                            response: expectedAuditResponse });
-                        should.deepEqual(response.body, prevBody, 'body of resopnse change');
-                    });
-                });});
+            afterEach(function(){
+                expectedAuditResponse.body = JSON.stringify(body);
+            });
+            it('Should audit log with body, if mask body specific field', function(){
+                options.response.maskBody = ['test1'];
+                let newBody = {
+                    body: 'body',
+                    test1: 'test2'
+                };
+                response._body = _.cloneDeep(newBody);
+                let prevBody = _.cloneDeep(response.body);
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                newBody.test1 = MASK;
+                expectedAuditResponse.body = JSON.stringify(newBody);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                    response: expectedAuditResponse });
+                should.deepEqual(response.body, prevBody, 'body of resopnse change');
+            });
+            it('Should not mask body if response content type is not json', () => {
+                let testContentType = 'text/xml';
+                options.response.maskBody = ['test1'];
+                let newBody = {
+                    body: 'body',
+                    test1: 'test2'
+                };
+                response.headers['content-type'] = testContentType;
+                response._body = _.cloneDeep(newBody);
+                let prevBody = _.cloneDeep(response.body);
 
+                loggerHelper.auditResponse(request, response, options);
+
+                expectedAuditResponse.body = JSON.stringify(newBody);
+                expectedAuditResponse.headers['content-type'] = testContentType;
+
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                    response: expectedAuditResponse });
+                should.deepEqual(response.body, prevBody, 'body of resopnse change');
+            });
+            it('Should not mask body if no headers', () => {
+                options.response.maskBody = ['test1'];
+                let newBody = {
+                    body: 'body',
+                    test1: 'test2'
+                };
+                response.headers = undefined;
+                response._headers = undefined;
+                response._body = _.cloneDeep(newBody);
+                let prevBody = _.cloneDeep(response.body);
+
+                loggerHelper.auditResponse(request, response, options);
+
+                expectedAuditResponse.body = JSON.stringify(newBody);
+
+                expectedAuditResponse.headers = NA;
+
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                    response: expectedAuditResponse });
+                should.deepEqual(response.body, prevBody, 'body of resopnse change');
+            });
+            it('Should not mask body if no content type header', () => {
+                options.response.maskBody = ['test1'];
+                let newBody = {
+                    body: 'body',
+                    test1: 'test2'
+                };
+                response.headers['content-type'] = undefined;
+                response._headers['content-type'] = undefined;
+                response._body = _.cloneDeep(newBody);
+                let prevBody = _.cloneDeep(response.body);
+
+                loggerHelper.auditResponse(request, response, options);
+
+                expectedAuditResponse.body = JSON.stringify(newBody);
+                expectedAuditResponse.headers['content-type'] = undefined;
+
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest,
+                    response: expectedAuditResponse });
+                should.deepEqual(response.body, prevBody, 'body of resopnse change');
+            });
+        });
+    });
 });
