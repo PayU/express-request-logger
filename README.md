@@ -118,6 +118,26 @@ Array of strings - pass the header names you wish to exclude from the audit (sen
 
 Array of strings - pass the fields you wish to mask in the headers of the responses (senstitive data like authorization headers etc..).
 
+##### levels
+
+Map of statusCodes to log levels. By default the audit is logged with level 'info'. It is possible to override it by configuration according to the statusCode of the response:
+ 
+ - Key: status code, or status code group: '2xx', '401', etc..
+ - Value: log level, valid values: 'trace', 'debug', 'info', 'warn', 'error'.
+ - Configuration errors are ignored and the log is info by default.
+
+ 
+ Example:
+```
+levels: {
+    "2xx":"info", // All 2xx responses are info
+    "401":"warn", // 401 are warn
+    "4xx':info", // All 4xx exceprt 401 are info
+    "503":"warn",
+    "5xx":"error" // All 5xx except 503 are errors, 503 is warn,
+}
+```
+
 
 ### Example
 
