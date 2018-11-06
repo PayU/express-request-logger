@@ -26,6 +26,9 @@ var query = {
     q2: 'fishy'
 };
 
+var expectedUTCTimestamp = '1970-01-01T00:00:00.000Z';
+var expectedMillisTimestamp = 0;
+
 describe('logger-helpers tests', function () {
     var sandbox, clock, loggerInfoStub, shouldAuditURLStub, loggerWarnStub, loggerErrorStub, getLogLevelStub;
     var request, response, options, expectedAuditRequest, expectedAuditResponse;
@@ -140,7 +143,11 @@ describe('logger-helpers tests', function () {
                 options.request.audit = false;
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: undefined });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: undefined,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
             });
         });
         describe('And additionalAudit is not empty', function () {
@@ -160,7 +167,7 @@ describe('logger-helpers tests', function () {
 
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, field1: 'field1', field2: 'field2' });
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, field1: 'field1', field2: 'field2', 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
             });
 
             it('Should not add to audit the additional audit details if its an empty object', function () {
@@ -172,7 +179,7 @@ describe('logger-helpers tests', function () {
 
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
             });
         });
         describe('And mask query params that are set to be masked', function () {
@@ -186,7 +193,11 @@ describe('logger-helpers tests', function () {
 
                 let expected = _.cloneDeep(expectedAuditRequest);
                 expected.query[maskedQuery] = MASK;
-                sinon.assert.calledWithMatch(loggerInfoStub, { request: expected });
+                sinon.assert.calledWithMatch(loggerInfoStub, {
+                    request: expected,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
 
                 // Clear created header for other tests
             });
@@ -202,7 +213,11 @@ describe('logger-helpers tests', function () {
                 let expected = _.cloneDeep(expectedAuditRequest);
                 expected.query[maskedQuery1] = MASK;
                 expected.query[maskedQuery2] = MASK;
-                sinon.assert.calledWith(loggerInfoStub, { request: expected });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expected,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
             });
         });
         describe('And exclude headers contains an header to exclude', function () {
@@ -216,7 +231,11 @@ describe('logger-helpers tests', function () {
                 let prevHeaders = _.cloneDeep(request.headers);
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
                 should.deepEqual(request.headers, prevHeaders, 'headers of request change');
             });
             it('Should audit log without the specified headers, if there are more than one', function () {
@@ -227,7 +246,11 @@ describe('logger-helpers tests', function () {
                 let prevHeaders = _.cloneDeep(request.headers);
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
                 should.deepEqual(request.headers, prevHeaders, 'headers of request change');
 
             });
@@ -239,7 +262,11 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
 
                 expectedAuditRequest.headers[headerToExclude] = 'other-value';
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
                 should.deepEqual(request.headers, prevHeaders, 'headers of request change');
                 // Clear created header for other tests
                 delete expectedAuditRequest.headers[headerToExclude];
@@ -256,7 +283,11 @@ describe('logger-helpers tests', function () {
             it('Should audit log with body, if no excludeBody was written in options', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
             });
             it('Should audit log without body, when excludeBody with \'*\'', function () {
                 options.request.excludeBody = [ALL_FIELDS];
@@ -264,7 +295,11 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
                 should.deepEqual(request.body, prevBody, 'body of request change');
 
             });
@@ -275,7 +310,11 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
             });
             it('Should audit log without body, when excludeBody by field and all body', function () {
                 options.request.excludeBody = ['field1', ALL_FIELDS];
@@ -283,7 +322,11 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
             });
             it('Should audit log body without specific field, when excludeBody by existing and unexisting field', function () {
                 options.request.excludeBody = ['field3', 'field1'];
@@ -292,7 +335,11 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = JSON.stringify({ 'field2': 'test' });
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
                 should.deepEqual(request.body, prevBody, 'body of request change');
             });
             it('Should audit log without body, when no body in request and excludeBody by field', function () {
@@ -301,7 +348,11 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
             });
 
             it('Should audit log without body, when body is number (not json)', function () {
@@ -312,7 +363,11 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledOnce(loggerWarnStub);
                 expectedAuditRequest.body = NA;
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
                 should.deepEqual(request.body, prevBody, 'body of request change');
             });
 
@@ -324,7 +379,11 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledOnce(loggerWarnStub);
                 expectedAuditRequest.body = NA;
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
                 should.deepEqual(request.body, prevBody, 'body of request change');
             });
 
@@ -337,7 +396,11 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.notCalled(loggerWarnStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest });
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
                 should.deepEqual(request.body, prevBody, 'body of request change');
             });
         });
@@ -364,7 +427,10 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+
                 });
             });
             it('Should log as error if getLogLevel returns error', () => {
@@ -375,7 +441,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerErrorStub);
                 sinon.assert.calledWith(loggerErrorStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
             })
             it('Should log as info if getLogLevel returns garbage', () => {
@@ -386,7 +454,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
             })
             it('Should log as info if getLogLevel returns undefined', () => {
@@ -397,7 +467,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
             })
             it('Should audit request if options.request.audit is true', function () {
@@ -408,7 +480,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
             });
             it('Should not audit request if options.request.audit is false', function () {
@@ -419,7 +493,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: undefined,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
             });
             it('Should audit response if options.response.audit is true', function () {
@@ -430,7 +506,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
             });
             it('Should not audit response if options.response.audit is false', function () {
@@ -441,7 +519,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: undefined
+                    response: undefined,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
             });
             it('Should log empty values as N/A', function () {
@@ -471,7 +551,9 @@ describe('logger-helpers tests', function () {
                         elapsed: 0,
                         headers: NA,
                         body: NA
-                    }
+                    },
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
             });
         });
@@ -488,7 +570,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
             });
             it('Should audit log without body, when excludeBody with \'*\'', function () {
@@ -499,7 +583,9 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
@@ -512,7 +598,9 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
@@ -525,7 +613,9 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
@@ -538,7 +628,9 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.body = JSON.stringify({ 'field2': 'test' });
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
@@ -551,7 +643,9 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
@@ -573,7 +667,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
 
                 should.deepEqual(response.headers, prevHeaders, 'headers of response change');
@@ -586,7 +682,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
 
                 should.deepEqual(response.headers, prevHeaders, 'headers of response change');
@@ -601,7 +699,9 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
 
                 should.deepEqual(response.headers, prevHeaders, 'headers of response change');
@@ -615,7 +715,9 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.headers[headerToExclude] = 'other-value';
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
                 // Clear created header for other tests
                 delete expectedAuditResponse.headers[headerToExclude];
@@ -643,7 +745,9 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.body = JSON.stringify(newBody);
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
@@ -665,7 +769,9 @@ describe('logger-helpers tests', function () {
 
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
@@ -688,7 +794,9 @@ describe('logger-helpers tests', function () {
 
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
@@ -710,7 +818,9 @@ describe('logger-helpers tests', function () {
 
                 sinon.assert.calledWith(loggerInfoStub, {
                     request: expectedAuditRequest,
-                    response: expectedAuditResponse
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
             });
