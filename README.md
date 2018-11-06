@@ -122,7 +122,7 @@ Array of strings - pass the fields you wish to mask in the headers of the respon
 
 Map of statusCodes to log levels. By default the audit is logged with level 'info'. It is possible to override it by configuration according to the statusCode of the response:
  
- - Key: status code, or status code group: '2xx', '401', etc..
+ - Key: status code, or status code group: '2xx', '401', etc.. First we try to match by exact match (for example 400), if no key found by exact match we fallback to match bu group (4xx).
  - Value: log level, valid values: 'trace', 'debug', 'info', 'warn', 'error'.
  - Configuration errors are ignored and the log is info by default.
 

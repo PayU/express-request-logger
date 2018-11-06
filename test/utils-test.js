@@ -196,6 +196,15 @@ describe('utils tests', function () {
             let result = utils.getLogLevel(200, { '200': 'error' });
             should(result).eql('error');
         });
+        it('Should return correct exact match if group is configured as well', () => {
+            let result = utils.getLogLevel(401, {
+                '200': 'error',
+                '4xx': 'debug',
+                '401': 'error',
+                '500': 'error'
+            });
+            should(result).eql('error');
+        })
         it('Should fallback to status group if exact match not found', () => {
             let result = utils.getLogLevel(404, {
                 '200': 'error',
