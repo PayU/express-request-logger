@@ -18,6 +18,7 @@ Middleware for logging request/responses in Express apps
 - Exclude response body fields
 - Exclude response specific headers
 - Exclude specific URLs from logging
+- Supported by Node v6 and above.
 
 ## Installation
 
