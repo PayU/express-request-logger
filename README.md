@@ -18,6 +18,7 @@ Middleware for logging request/responses in Express apps
 - Exclude response body fields
 - Exclude response specific headers
 - Exclude specific URLs from logging
+- Supported by Node v6 and above.
 
 ## Installation
 
@@ -117,6 +118,26 @@ Array of strings - pass the header names you wish to exclude from the audit (sen
 ##### maskHeaders
 
 Array of strings - pass the fields you wish to mask in the headers of the responses (senstitive data like authorization headers etc..).
+
+##### levels
+
+Map of statusCodes to log levels. By default the audit is logged with level 'info'. It is possible to override it by configuration according to the statusCode of the response:
+ 
+ - Key: status code, or status code group: '2xx', '401', etc.. First we try to match by exact match (for example 400), if no key found by exact match we fallback to match bu group (4xx).
+ - Value: log level, valid values: 'trace', 'debug', 'info', 'warn', 'error'.
+ - Configuration errors are ignored and the log is info by default.
+
+ 
+ Example:
+```
+levels: {
+    "2xx":"info", // All 2xx responses are info
+    "401":"warn", // 401 are warn
+    "4xx':info", // All 4xx except 401 are info
+    "503":"warn",
+    "5xx":"error" // All 5xx except 503 are errors, 503 is warn,
+}
+```
 
 
 ### Example
