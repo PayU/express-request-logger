@@ -132,7 +132,7 @@ Map of statusCodes to log levels. By default the audit is logged with level 'inf
 levels: {
     "2xx":"info", // All 2xx responses are info
     "401":"warn", // 401 are warn
-    "4xx':info", // All 4xx exceprt 401 are info
+    "4xx':info", // All 4xx except 401 are info
     "503":"warn",
     "5xx":"error" // All 5xx except 503 are errors, 503 is warn,
 }
