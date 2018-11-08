@@ -435,10 +435,10 @@ describe('logger-helpers tests', function () {
 
                 });
             });
-            it('Should shorten response body if options.maxResponseBodyLength > response body length', function () {
+            it('Should shorten response body if options.response.maxBodyLength > response body length', function () {
                 shouldAuditURLStub.returns(true);
                 options.request.audit = true;
-                options.maxResponseBodyLength = 5;
+                options.response.maxBodyLength = 5;
                 clock.tick(elapsed);
                 const expectedAuditResponse = getExpectedAuditResponse();
                 expectedAuditResponse.body = '{"bod...';
@@ -453,10 +453,10 @@ describe('logger-helpers tests', function () {
 
                 });
             });
-            it('Should shorten response body if options.maxRequestBodyLength > request body length', function () {
+            it('Should shorten request body if options.request.maxBodyLength > request body length', function () {
                 shouldAuditURLStub.returns(true);
                 options.request.audit = true;
-                options.maxRequestBodyLength = 5;
+                options.request.maxBodyLength = 5;
                 clock.tick(elapsed);
                 const expectedAuditRequest = getExpectedAuditRequest();
                 expectedAuditRequest.body = '{"bod...';
@@ -526,6 +526,7 @@ describe('logger-helpers tests', function () {
             it('Should not audit request if options.request.audit is false', function () {
                 shouldAuditURLStub.returns(true);
                 options.request.audit = false;
+                options.request.maxBodyLength = 50;
                 clock.tick(elapsed);
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -552,6 +553,7 @@ describe('logger-helpers tests', function () {
             it('Should not audit response if options.response.audit is false', function () {
                 shouldAuditURLStub.returns(true);
                 options.response.audit = false;
+                options.response.maxBodyLength = 50;
                 clock.tick(elapsed);
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
