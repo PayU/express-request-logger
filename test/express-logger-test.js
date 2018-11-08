@@ -46,14 +46,16 @@ describe('express-logger tests', function(){
                     maskBody: 10,
                     excludeBody: 's',
                     excludeHeaders: 2,
-                    maskHeaders: 3
+                    maskHeaders: 3,
+                    maxBodyLength: -5
                 },
                 response: {
                     audit: false,
                     maskBody: false,
                     excludeBody: 't',
                     excludeHeaders: 'd',
-                    maskHeaders: 2
+                    maskHeaders: 2,
+                    maxBodyLength: 'asd'
                 },
                 doubleAudit: true,
                 excludeURLs: 'a'
