@@ -31,7 +31,7 @@ var expectedMillisTimestamp = 0;
 
 describe('logger-helpers tests', function () {
     var sandbox, clock, loggerInfoStub, shouldAuditURLStub, loggerWarnStub, loggerErrorStub, getLogLevelStub;
-    var request, response, options, expectedAuditRequest, expectedAuditResponse;
+    var request, response, options, expectedAuditRequest, getExpectedAuditRequest, expectedAuditResponse, getExpectedAuditResponse;
 
     before(function () {
         sandbox = sinon.sandbox.create();
@@ -101,6 +101,7 @@ describe('logger-helpers tests', function () {
             timestamp_ms: startTime.valueOf(),
             body: JSON.stringify(body),
         };
+        getExpectedAuditRequest = () => expectedAuditRequest;
         expectedAuditResponse = {
             status_code: 200,
             timestamp: endTime.toISOString(),
@@ -112,6 +113,7 @@ describe('logger-helpers tests', function () {
                 'content-type': 'application/json'
             },
         };
+        getExpectedAuditResponse = () => expectedAuditResponse;
     });
 
     after(function () {
@@ -423,6 +425,42 @@ describe('logger-helpers tests', function () {
                 shouldAuditURLStub.returns(true);
                 options.request.audit = true;
                 clock.tick(elapsed);
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+
+                });
+            });
+            it('Should shorten response body if options.maxResponseBodyLength > response body length', function () {
+                shouldAuditURLStub.returns(true);
+                options.request.audit = true;
+                options.maxResponseBodyLength = 5;
+                clock.tick(elapsed);
+                const expectedAuditResponse = getExpectedAuditResponse();
+                expectedAuditResponse.body = '{"bod...';
+
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+
+                });
+            });
+            it('Should shorten response body if options.maxRequestBodyLength > request body length', function () {
+                shouldAuditURLStub.returns(true);
+                options.request.audit = true;
+                options.maxRequestBodyLength = 5;
+                clock.tick(elapsed);
+                const expectedAuditRequest = getExpectedAuditRequest();
+                expectedAuditRequest.body = '{"bod...';
+
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
