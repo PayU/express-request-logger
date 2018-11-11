@@ -89,6 +89,10 @@ Array of strings - pass the header names you wish to exclude from the audit (sen
 
 Array of strings - pass the fields you wish to mask in the headers of the requests (senstitive data like authorization headers etc..).
 
+ ##### maxBodyLength
+
+ Restrict request body's logged content length (inputs other than positive integers will be ignored).
+
 #### response
 
 Specific configuration for responses
@@ -127,6 +131,10 @@ Map of statusCodes to log levels. By default the audit is logged with level 'inf
  - Value: log level, valid values: 'trace', 'debug', 'info', 'warn', 'error'.
  - Configuration errors are ignored and the log is info by default.
 
+ ##### maxBodyLength
+
+ Restrict response body's logged content length (inputs other than positive integers will be ignored).
+
  
  Example:
 ```
@@ -149,14 +157,16 @@ app.use(audit({
     request: {
         maskBody: [‘password’], // Mask 'password' field in incoming requests
         excludeHeaders: [‘authorization’], // Exclude 'authorization' header from requests
-        excludeBody: [‘creditCard’] // Exclude 'creditCard' field from requests body
+        excludeBody: [‘creditCard’], // Exclude 'creditCard' field from requests body
         maskHeaders: [‘header1’], // Mask 'header1' header in incoming requests
+        maxBodyLength: 50 // limit length to 50 chars + '...'
     },
     response: {
         maskBody: [‘session_token’] // Mask 'session_token' field in response body
-        excludeHeaders: [‘*’] // Exclude all headers from responses,
-        excludeBody: [‘*’] // Exclude all body from responses
+        excludeHeaders: [‘*’], // Exclude all headers from responses,
+        excludeBody: [‘*’], // Exclude all body from responses
         maskHeaders: [‘header1’], // Mask 'header1' header in incoming requests
+        maxBodyLength: 50 // limit length to 50 chars + '...'
     }
 }));
 ```

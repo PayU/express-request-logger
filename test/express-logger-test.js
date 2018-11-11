@@ -39,6 +39,56 @@ describe('express-logger tests', function(){
         loggerHelper.auditResponse.restore();
     });
     describe('When calling express-logger module', function(){
+        it('should correctly setup', function(){
+            let options = {
+                request: {
+                    audit: false,
+                    maskBody: [10],
+                    excludeBody: ['s'],
+                    excludeHeaders: [2],
+                    maskHeaders: [3],
+                    maxBodyLength: 50
+                },
+                response: {
+                    audit: false,
+                    maskBody: false,
+                    excludeBody: ['t'],
+                    excludeHeaders: ['d'],
+                    maskHeaders: [2],
+                    maxBodyLength: 50
+                },
+                doubleAudit: true,
+                excludeURLs: ['a']
+            };
+
+             let expectedOptions = {
+                    request: {
+                        audit: false,
+                        maskBody: [10],
+                        maskQuery: [],
+                        excludeBody: ['s'],
+                        excludeHeaders: [2],
+                        maskHeaders: [3],
+                        maxBodyLength: 50
+                    },
+                    response: {
+                        audit: false,
+                        maskBody: [false],
+                        excludeBody: ['t'],
+                        excludeHeaders: ['d'],
+                        maskHeaders: [2],
+                        maxBodyLength: 50
+                    },
+                    doubleAudit: true,
+                    excludeURLs: ['a']
+                };
+
+            expressLogger(options);
+            let convertedOptions = expressLogger.__get__('setupOptions');
+           delete convertedOptions.logger;
+           (convertedOptions).should.containEql(expectedOptions);
+
+        });
         it('should correctly setup in case of wrong options', function(){
             let options = {
                 request: {
@@ -46,14 +96,16 @@ describe('express-logger tests', function(){
                     maskBody: 10,
                     excludeBody: 's',
                     excludeHeaders: 2,
-                    maskHeaders: 3
+                    maskHeaders: 3,
+                    maxBodyLength: -5
                 },
                 response: {
                     audit: false,
                     maskBody: false,
                     excludeBody: 't',
                     excludeHeaders: 'd',
-                    maskHeaders: 2
+                    maskHeaders: 2,
+                    maxBodyLength: 'asd'
                 },
                 doubleAudit: true,
                 excludeURLs: 'a'
@@ -66,14 +118,16 @@ describe('express-logger tests', function(){
                         maskQuery: [],
                         excludeBody: ['s'],
                         excludeHeaders: [2],
-                        maskHeaders: [3]
+                        maskHeaders: [3],
+                        maxBodyLength: undefined
                     },
                     response: {
                         audit: false,
                         maskBody: [false],
                         excludeBody: ['t'],
                         excludeHeaders: ['d'],
-                        maskHeaders: [2]
+                        maskHeaders: [2],
+                        maxBodyLength: undefined
                     },
                     doubleAudit: true,
                     excludeURLs: ['a']
@@ -96,6 +150,22 @@ describe('express-logger tests', function(){
             res.end();
             should(resEndStub.called).eql(true);
             should(auditResponseStub.called).eql(true);
+        });
+        it('should call auditRequest if options.doubleAudit = true', function(){
+            var options = {
+                doubleAudit: true
+            };
+
+            var auditMethod = expressLogger(options);
+            // Start request
+            auditMethod(req, res, next);
+            should(auditRequestStub.called).eql(true);
+            should(next.calledOnce).eql(true);
+
+            // End request
+            res.end();
+            should(resEndStub.calledOnce).eql(true);
+            should(auditResponseStub.calledOnce).eql(true);
         });
         it('should call auditRequest if options.doubleAudit = true', function(){
             var options = {
