@@ -9,7 +9,7 @@ var  rewire = require('rewire'),
 
 describe('express-logger tests', function(){
     var sandbox, auditRequestStub, auditResponseStub;
-    var resEndStub, resWriteStub;
+    var resEndStub, resWriteStub, resJsonStub;
     var req, res, next;
 
     before(function(){
@@ -30,6 +30,7 @@ describe('express-logger tests', function(){
 
         resEndStub = sandbox.stub(res, 'end');
         resWriteStub = sandbox.stub(res, 'write');
+        resJsonStub = sandbox.stub(res, 'json');
 
         next = sandbox.stub();
     });
@@ -197,7 +198,7 @@ describe('express-logger tests', function(){
             res.end();
             should(resEndStub.calledOnce).eql(true);
             should(auditResponseStub.calledOnce).eql(true);
-            should(res._body).eql('chunk');
+            should(res._bodyStr).eql('chunk');
         });
         it('Should add body from end chunk to response', function(){
             var auditMethod = expressLogger();
@@ -209,7 +210,23 @@ describe('express-logger tests', function(){
             res.end('chunk');
             should(resEndStub.calledOnce).eql(true);
             should(auditResponseStub.calledOnce).eql(true);
-            should(res._body).eql('chunk');
+            should(res._bodyStr).eql('chunk');
+        });
+        it('Should add bodyJson to response', function(){
+            var auditMethod = expressLogger();
+            // Start request
+            auditMethod(req, res, next);
+            should(next.calledOnce).eql(true);
+
+            // End request
+            res.json({ key: 'value'});
+            res.end('chunk');
+            should(resEndStub.calledOnce).eql(true);
+            sinon.assert.calledOnce(resJsonStub);
+            sinon.assert.calledWith(resJsonStub, {key: 'value'});
+            should(auditResponseStub.calledOnce).eql(true);
+            should(res._bodyStr).eql('chunk');
+            should(res._bodyJson).eql({key: 'value'});
         });
     });
 });

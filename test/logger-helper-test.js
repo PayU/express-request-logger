@@ -30,7 +30,7 @@ var expectedUTCTimestamp = '1970-01-01T00:00:00.000Z';
 var expectedMillisTimestamp = 0;
 
 describe('logger-helpers tests', function () {
-    var sandbox, clock, loggerInfoStub, shouldAuditURLStub, loggerWarnStub, loggerErrorStub, getLogLevelStub;
+    var sandbox, clock, loggerInfoStub, shouldAuditURLStub, loggerWarnStub, loggerErrorStub, getLogLevelStub, maskJsonSpy;
     var request, response, options, expectedAuditRequest, getExpectedAuditRequest, expectedAuditResponse, getExpectedAuditResponse;
 
     before(function () {
@@ -38,6 +38,7 @@ describe('logger-helpers tests', function () {
         clock = sinon.useFakeTimers();
         shouldAuditURLStub = sandbox.stub(utils, 'shouldAuditURL');
         getLogLevelStub = sandbox.stub(utils, 'getLogLevel');
+        maskJsonSpy = sandbox.spy(utils, 'maskJson');
     });
 
     beforeEach(function () {
@@ -74,7 +75,7 @@ describe('logger-helpers tests', function () {
 
         request.timestamp = startTime;
         response = httpMocks.createResponse();
-        response._body = JSON.stringify(body);
+        response._bodyStr = JSON.stringify(body);
         response.timestamp = endTime;
         response.headers = { 'header2': 'some-other-value', 'content-type': 'application/json' };
         response._headers = response.headers;
@@ -114,6 +115,10 @@ describe('logger-helpers tests', function () {
             },
         };
         getExpectedAuditResponse = () => expectedAuditResponse;
+    });
+
+    afterEach(function () {
+        sandbox.reset();
     });
 
     after(function () {
@@ -200,6 +205,7 @@ describe('logger-helpers tests', function () {
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
                 });
+                sinon.assert.calledOnce(maskJsonSpy);
 
                 // Clear created header for other tests
             });
@@ -432,8 +438,43 @@ describe('logger-helpers tests', function () {
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
-
                 });
+                sinon.assert.notCalled(maskJsonSpy);
+            });
+            it('Should use _bodyStr if masking is not used', function () {
+                shouldAuditURLStub.returns(true);
+                options.request.audit = true;
+                let differentJsonBody = Object.assign({key: 'value'}, body);
+                response.json(differentJsonBody);
+                clock.tick(elapsed);
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    response: expectedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
+                sinon.assert.notCalled(maskJsonSpy);
+            });
+            it('Should use _bodyJson if masking is used', function () {
+                shouldAuditURLStub.returns(true);
+                options.request.audit = true;
+                options.response.excludeBody = ['someFile'];
+                let differentJsonBody = Object.assign({key: 'value'}, body);
+                response._bodyJson = differentJsonBody;
+                let expectedMaskedAuditResponse = _.cloneDeep(expectedAuditResponse);
+                expectedMaskedAuditResponse.body = JSON.stringify(differentJsonBody)
+                clock.tick(elapsed);
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expectedAuditRequest,
+                    response: expectedMaskedAuditResponse,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
+                sinon.assert.calledOnce(maskJsonSpy);
             });
             it('Should shorten response body if options.response.maxBodyLength < response body length', function () {
                 shouldAuditURLStub.returns(true);
@@ -691,7 +732,7 @@ describe('logger-helpers tests', function () {
             });
             it('Should audit log without body, when excludeBody by field and all body', function () {
                 options.response.excludeBody = ['field1', ALL_FIELDS];
-                response._body = JSON.stringify({ 'field1': 1, 'field2': 'test' });
+                response._bodyStr = JSON.stringify({ 'field1': 1, 'field2': 'test' });
                 let prevBody = _.cloneDeep(response.body);
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -706,7 +747,7 @@ describe('logger-helpers tests', function () {
             });
             it('Should audit log body without specific field, when excludeBody by existing and unexisting field', function () {
                 options.response.excludeBody = ['field3', 'field1'];
-                response._body = JSON.stringify({ 'field1': 1, 'field2': 'test' });
+                response._bodyStr = JSON.stringify({ 'field1': 1, 'field2': 'test' });
                 let prevBody = _.cloneDeep(response.body);
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -721,7 +762,7 @@ describe('logger-helpers tests', function () {
             });
             it('Should audit log without body, when no body in response and excludeBody by field', function () {
                 options.response.excludeBody = ['field3', 'field1'];
-                delete response._body;
+                delete response._bodyStr;
                 let prevBody = _.cloneDeep(response.body);
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -822,7 +863,7 @@ describe('logger-helpers tests', function () {
                     body: 'body',
                     test1: 'test2'
                 };
-                response._body = _.cloneDeep(newBody);
+                response._bodyStr = _.cloneDeep(newBody);
                 let prevBody = _.cloneDeep(response.body);
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -835,6 +876,7 @@ describe('logger-helpers tests', function () {
                     'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
+                sinon.assert.calledOnce(maskJsonSpy);
             });
             it('Should not mask body if response content type is not json', () => {
                 let testContentType = 'text/xml';
@@ -844,7 +886,7 @@ describe('logger-helpers tests', function () {
                     test1: 'test2'
                 };
                 response.headers['content-type'] = testContentType;
-                response._body = _.cloneDeep(newBody);
+                response._bodyStr = _.cloneDeep(newBody);
                 let prevBody = _.cloneDeep(response.body);
 
                 loggerHelper.auditResponse(request, response, options);
@@ -859,6 +901,7 @@ describe('logger-helpers tests', function () {
                     'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
+                sinon.assert.notCalled(maskJsonSpy);
             });
             it('Should not mask body if no headers', () => {
                 options.response.maskBody = ['test1'];
@@ -868,7 +911,7 @@ describe('logger-helpers tests', function () {
                 };
                 response.headers = undefined;
                 response._headers = undefined;
-                response._body = _.cloneDeep(newBody);
+                response._bodyStr = _.cloneDeep(newBody);
                 let prevBody = _.cloneDeep(response.body);
 
                 loggerHelper.auditResponse(request, response, options);
@@ -884,6 +927,7 @@ describe('logger-helpers tests', function () {
                     'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
+                sinon.assert.notCalled(maskJsonSpy);
             });
             it('Should not mask body if no content type header', () => {
                 options.response.maskBody = ['test1'];
@@ -893,7 +937,7 @@ describe('logger-helpers tests', function () {
                 };
                 response.headers['content-type'] = undefined;
                 response._headers['content-type'] = undefined;
-                response._body = _.cloneDeep(newBody);
+                response._bodyStr = _.cloneDeep(newBody);
                 let prevBody = _.cloneDeep(response.body);
 
                 loggerHelper.auditResponse(request, response, options);
@@ -908,6 +952,7 @@ describe('logger-helpers tests', function () {
                     'millis-timestamp': expectedMillisTimestamp
                 });
                 should.deepEqual(response.body, prevBody, 'body of resopnse change');
+                sinon.assert.notCalled(maskJsonSpy);
             });
         });
     });
