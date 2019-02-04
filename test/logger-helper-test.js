@@ -69,6 +69,7 @@ describe('logger-helpers tests', function () {
             query: query,
             body: body,
             headers: {
+                'content-type': 'application/json',
                 header1: 'some-value'
             }
         });
@@ -95,6 +96,7 @@ describe('logger-helpers tests', function () {
             url_route: '/somepath/:id',
             query: query,
             headers: {
+                'content-type': 'application/json',
                 header1: 'some-value'
             },
             url_params: params,
@@ -189,6 +191,39 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
             });
         });
+        describe('When handling non-json body with json content-type', function () {
+            it('Should issue a warning and set the body to "N/A"', function () {
+                shouldAuditURLStub.returns(true);
+                options.request.maskBody = ['test'];
+                request.body = 'body';
+                expectedAuditRequest.body = 'N/A';
+
+                loggerHelper.auditRequest(request, options);
+                sinon.assert.calledOnce(loggerWarnStub);
+                sinon.assert.calledWithMatch(loggerWarnStub, sinon.match.instanceOf(Object), sinon.match('Error parsing json'));
+
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
+            })
+
+        })
+        describe('When handling non-json body', function () {
+            it('Should not try to mask it and print the body as is', function () {
+                shouldAuditURLStub.returns(true);
+                options.request.maskBody = ['test'];
+                request.body = 'body';
+                delete request.headers['content-type'];
+                delete expectedAuditRequest.headers['content-type'];
+                expectedAuditRequest.body = 'body';
+
+                loggerHelper.auditRequest(request, options);
+                sinon.assert.notCalled(loggerWarnStub);
+
+                sinon.assert.calledOnce(loggerInfoStub);
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
+            })
+
+        })
         describe('And mask query params that are set to be masked', function () {
             it('Should mask the query param', function () {
                 var maskedQuery = 'q1';
@@ -444,7 +479,7 @@ describe('logger-helpers tests', function () {
             it('Should use _bodyStr if masking is not used', function () {
                 shouldAuditURLStub.returns(true);
                 options.request.audit = true;
-                let differentJsonBody = Object.assign({key: 'value'}, body);
+                let differentJsonBody = Object.assign({ key: 'value' }, body);
                 response.json(differentJsonBody);
                 clock.tick(elapsed);
                 loggerHelper.auditResponse(request, response, options);
@@ -461,7 +496,7 @@ describe('logger-helpers tests', function () {
                 shouldAuditURLStub.returns(true);
                 options.request.audit = true;
                 options.response.excludeBody = ['someFile'];
-                let differentJsonBody = Object.assign({key: 'value'}, body);
+                let differentJsonBody = Object.assign({ key: 'value' }, body);
                 response._bodyJson = differentJsonBody;
                 let expectedMaskedAuditResponse = _.cloneDeep(expectedAuditResponse);
                 expectedMaskedAuditResponse.body = JSON.stringify(differentJsonBody)
