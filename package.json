@@ -6,7 +6,9 @@
   "scripts": {
     "test": "./node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- --recursive ./test/*-test.js",
     "test-travis": "./node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --recursive --reporter spec --check-leaks test/",
-    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -36,6 +38,8 @@
   "dependencies": {
     "bunyan": "^1.8.5",
     "flat": "^4.0.0",
-    "lodash": "^4.17.5"
-  }
+    "lodash": "^4.17.5",
+    "snyk": "^1.189.0"
+  },
+  "snyk": true
 }
