@@ -93,6 +93,11 @@ Array of strings - pass the fields you wish to mask in the headers of the reques
 
  Restrict request body's logged content length (inputs other than positive integers will be ignored).
 
+##### customMaskBodyFunc
+
+ Additional to mask options, you can add your own functionality to mask request body. This function will execute 
+ as a masking function before the package functions.
+
 #### response
 
 Specific configuration for responses
