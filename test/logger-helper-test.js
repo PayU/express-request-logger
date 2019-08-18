@@ -262,6 +262,29 @@ describe('logger-helpers tests', function () {
                     'millis-timestamp': expectedMillisTimestamp
                 });
             });
+            it('should execute custom mask function for request',function () {
+                options.request.customMaskBodyFunc = function(request){
+                    should(request.body).eql({
+                        body: "body"
+                    });
+                    return {test:'MASKED'}
+                };
+
+                shouldAuditURLStub.returns(true);
+
+                loggerHelper.auditRequest(request, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+
+                let expected = _.cloneDeep(expectedAuditRequest);
+                expected.body = '{"test":"MASKED"}';
+                sinon.assert.calledWith(loggerInfoStub, {
+                    request: expected,
+                    'utc-timestamp': expectedUTCTimestamp,
+                    'millis-timestamp': expectedMillisTimestamp
+                });
+
+
+            })
         });
         describe('And exclude headers contains an header to exclude', function () {
             var headerToExclude = 'header-to-exclude';
