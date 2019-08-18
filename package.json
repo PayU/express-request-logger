@@ -1,6 +1,6 @@
 {
   "name": "express-requests-logger",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Middleware for logging request/responses in Express apps",
   "main": "index.js",
   "scripts": {
