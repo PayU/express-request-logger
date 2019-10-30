@@ -153,6 +153,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: undefined,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -176,7 +177,7 @@ describe('logger-helpers tests', function () {
 
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, field1: 'field1', field2: 'field2', 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
+                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, field1: 'field1', field2: 'field2', 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp, stage: 'start' });
             });
 
             it('Should not add to audit the additional audit details if its an empty object', function () {
@@ -188,7 +189,7 @@ describe('logger-helpers tests', function () {
 
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
+                sinon.assert.calledWith(loggerInfoStub, { stage: 'start', request: expectedAuditRequest, 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
             });
         });
         describe('When handling non-json body with json content-type', function () {
@@ -203,7 +204,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledWithMatch(loggerWarnStub, sinon.match.instanceOf(Object), sinon.match('Error parsing json'));
 
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
+                sinon.assert.calledWith(loggerInfoStub, { stage: 'start', request: expectedAuditRequest, 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
             })
 
         })
@@ -220,7 +221,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.notCalled(loggerWarnStub);
 
                 sinon.assert.calledOnce(loggerInfoStub);
-                sinon.assert.calledWith(loggerInfoStub, { request: expectedAuditRequest, 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
+                sinon.assert.calledWith(loggerInfoStub, { stage: 'start', request: expectedAuditRequest, 'utc-timestamp': expectedUTCTimestamp, 'millis-timestamp': expectedMillisTimestamp });
             })
 
         })
@@ -236,6 +237,7 @@ describe('logger-helpers tests', function () {
                 let expected = _.cloneDeep(expectedAuditRequest);
                 expected.query[maskedQuery] = MASK;
                 sinon.assert.calledWithMatch(loggerInfoStub, {
+                    stage: 'start', 
                     request: expected,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -257,6 +259,7 @@ describe('logger-helpers tests', function () {
                 expected.query[maskedQuery1] = MASK;
                 expected.query[maskedQuery2] = MASK;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expected,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -278,6 +281,7 @@ describe('logger-helpers tests', function () {
                 let expected = _.cloneDeep(expectedAuditRequest);
                 expected.body = '{"test":"MASKED"}';
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expected,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -298,6 +302,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -313,6 +318,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -329,6 +335,7 @@ describe('logger-helpers tests', function () {
 
                 expectedAuditRequest.headers[headerToExclude] = 'other-value';
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -350,6 +357,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditRequest(request, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -362,6 +370,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -377,6 +386,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -389,6 +399,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -402,6 +413,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = JSON.stringify({ 'field2': 'test' });
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -415,6 +427,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditRequest.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -430,6 +443,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerWarnStub);
                 expectedAuditRequest.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -446,6 +460,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerWarnStub);
                 expectedAuditRequest.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -463,6 +478,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.notCalled(loggerWarnStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'start', 
                     request: expectedAuditRequest,
                     'utc-timestamp': expectedUTCTimestamp,
                     'millis-timestamp': expectedMillisTimestamp
@@ -492,6 +508,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -508,6 +525,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -527,6 +545,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedMaskedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -545,6 +564,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -560,6 +580,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -575,6 +596,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -590,6 +612,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -608,6 +631,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -622,6 +646,7 @@ describe('logger-helpers tests', function () {
 
                 sinon.assert.calledOnce(loggerErrorStub);
                 sinon.assert.calledWith(loggerErrorStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -635,6 +660,7 @@ describe('logger-helpers tests', function () {
 
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -648,6 +674,7 @@ describe('logger-helpers tests', function () {
 
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -661,6 +688,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -675,6 +703,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: undefined,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -688,6 +717,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -702,6 +732,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: undefined,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -717,6 +748,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: {
                         method: NA,
                         url: NA,
@@ -753,6 +785,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -766,6 +799,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditResponse.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -781,6 +815,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditResponse.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -796,6 +831,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditResponse.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -811,6 +847,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditResponse.body = JSON.stringify({ 'field2': 'test' });
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -826,6 +863,7 @@ describe('logger-helpers tests', function () {
                 sinon.assert.calledOnce(loggerInfoStub);
                 expectedAuditResponse.body = NA;
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -850,6 +888,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -865,6 +904,7 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.headers = NA;
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -882,6 +922,7 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -898,6 +939,7 @@ describe('logger-helpers tests', function () {
 
                 expectedAuditResponse.headers[headerToExclude] = 'other-value';
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -928,6 +970,7 @@ describe('logger-helpers tests', function () {
                 newBody.test1 = MASK;
                 expectedAuditResponse.body = JSON.stringify(newBody);
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -953,6 +996,7 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.headers['content-type'] = testContentType;
 
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -979,6 +1023,7 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.headers = NA;
 
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
@@ -1004,6 +1049,7 @@ describe('logger-helpers tests', function () {
                 expectedAuditResponse.headers['content-type'] = undefined;
 
                 sinon.assert.calledWith(loggerInfoStub, {
+                    stage: 'end', 
                     request: expectedAuditRequest,
                     response: expectedAuditResponse,
                     'utc-timestamp': expectedUTCTimestamp,
