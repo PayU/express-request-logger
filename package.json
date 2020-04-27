@@ -4,8 +4,8 @@
   "description": "Middleware for logging request/responses in Express apps",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- --recursive ./test/*-test.js",
-    "test-travis": "./node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --recursive --reporter spec --check-leaks test/",
+    "test": "node_modules/.bin/_mocha -- --recursive ./test/*-test.js",
+    "test-travis": "./node_modules/.bin/nyc npm test",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
   "repository": {
@@ -24,11 +24,28 @@
     "url": "https://github.com/ugolas/express-request-logger/issues"
   },
   "homepage": "https://github.com/ugolas/express-request-logger#readme",
+  "nyc": {
+    "check-coverage": true,
+    "report-dir": "./coverage",
+    "lines": 97,
+    "statements": 97,
+    "functions": 100,
+    "branches": 96,
+    "include": [
+      "lib"
+    ],
+    "reporter": [
+      "lcov",
+      "text"
+    ],
+    "cache": true,
+    "all": true
+  },  
   "devDependencies": {
     "coveralls": "^3.0.0",
-    "istanbul": "^0.4.5",
     "mocha": "^7.1.2",
     "node-mocks-http": "^1.5.6",
+    "nyc": "^15.0.1",
     "rewire": "^3.0.2",
     "should": "^11.1.2",
     "sinon": "^1.17.7"
