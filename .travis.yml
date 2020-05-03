@@ -1,8 +1,15 @@
 language: node_js
 
 node_js:
-  - "6"
   - "8"
-  - "node"
+  - "10"
+  - "12"
 script: "npm run-script test-travis"
-after_success: 'npm run coveralls'
+
+jobs:
+  include:
+    - language: node_js
+      node_js: node
+      script:
+        - nyc npm run test
+      after_success: "npm run coveralls"

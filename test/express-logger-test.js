@@ -52,7 +52,7 @@ describe('express-logger tests', function(){
                 },
                 response: {
                     audit: false,
-                    maskBody: false,
+                    maskBody: [false],
                     excludeBody: ['t'],
                     excludeHeaders: ['d'],
                     maskHeaders: [2],
@@ -115,30 +115,31 @@ describe('express-logger tests', function(){
              let expectedOptions = {
                     request: {
                         audit: false,
-                        maskBody: [10],
+                        maskBody: [],
                         maskQuery: [],
-                        excludeBody: ['s'],
-                        excludeHeaders: [2],
-                        maskHeaders: [3],
+                        excludeBody: [],
+                        excludeHeaders: [],
+                        maskHeaders: [],
                         maxBodyLength: undefined
                     },
                     response: {
                         audit: false,
-                        maskBody: [false],
-                        excludeBody: ['t'],
-                        excludeHeaders: ['d'],
-                        maskHeaders: [2],
+                        maskBody: [],
+                        excludeBody: [],
+                        excludeHeaders: [],
+                        maskHeaders: [],
                         maxBodyLength: undefined
                     },
                     doubleAudit: true,
-                    excludeURLs: ['a']
+                    excludeURLs: []
                 };
 
-            expressLogger(options);
-            let convertedOptions = expressLogger.__get__('setupOptions');
-           delete convertedOptions.logger;
-           (convertedOptions).should.containEql(expectedOptions);
-
+                try {
+                    expressLogger(options);
+                    should.fail('Expected to throw an error');
+                } catch (err){
+                    should(err.message).eql('Invalid value specified for field: request.maskBody, expected array');
+                }
         });
         it('should audit response and call next', function(){
             var auditMethod = expressLogger();
