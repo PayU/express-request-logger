@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [3.0.0] - 2019-02-15
+
+### Added
+
+- Add CHANGELOG.md from [@ugolas](https://github.com/ugolas).
+
 ### Changed
 
 - Removed support for objects configuration in array fields from [@ugolas](https://github.com/ugolas).
