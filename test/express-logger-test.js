@@ -134,11 +134,12 @@ describe('express-logger tests', function(){
                     excludeURLs: []
                 };
 
-            expressLogger(options);
-            let convertedOptions = expressLogger.__get__('setupOptions');
-           delete convertedOptions.logger;
-           (convertedOptions).should.containEql(expectedOptions);
-
+                try {
+                    expressLogger(options);
+                    should.fail('Expected to throw an error');
+                } catch (err){
+                    should(err.message).eql('Invalid value specified for field: request.maskBody, expected array');
+                }
         });
         it('should audit response and call next', function(){
             var auditMethod = expressLogger();
