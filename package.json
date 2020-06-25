@@ -51,7 +51,7 @@
     "sinon": "^1.17.7"
   },
   "dependencies": {
-    "bunyan": "^1.8.5",
+    "bunyan": "^1.8.13",
     "flat": "^4.0.0",
     "lodash": "^4.17.14"
   }
