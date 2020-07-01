@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.1] - 2019-07-01
+
+### Changed
+
+- Update bunyan dependencies to fix vulnerabilities from [@ugolas](https://github.com/ugolas).
 
 ## [3.0.0] - 2019-02-15
 
