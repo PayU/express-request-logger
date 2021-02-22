@@ -53,6 +53,6 @@
   "dependencies": {
     "bunyan": "^1.8.14",
     "flat": "^5.0.2",
-    "lodash": "^4.17.14"
+    "lodash": "^4.17.21"
   }
 }
