@@ -42,10 +42,10 @@
     "all": true
   },
   "devDependencies": {
-    "coveralls": "^3.0.0",
-    "mocha": "^7.1.2",
-    "node-mocks-http": "^1.5.6",
-    "nyc": "^15.0.1",
+    "coveralls": "^3.1.0",
+    "mocha": "^7.2.0",
+    "node-mocks-http": "^1.10.1",
+    "nyc": "^15.1.0",
     "rewire": "^3.0.2",
     "should": "^11.1.2",
     "sinon": "^1.17.7"
