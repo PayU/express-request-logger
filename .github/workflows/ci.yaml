@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         platform: [ubuntu-latest]
-        node: ['8', '10', '12']
+        node: ['8', '10', '12', '14']
     needs: [package-lock-lint]
     name: test (node V${{ matrix.node}})
     runs-on: ${{ matrix.platform }}
