@@ -1,0 +1,56 @@
+name: CI
+
+on: [ push, pull_request ]
+
+jobs:
+  package-lock-lint:
+    name: package-lock lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: lint package-lock
+        run: npx lockfile-lint --path package-lock.json --allowed-hosts npm --validate-https
+
+  test:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest]
+        node: ['8', '10', '12', '14']
+    needs: [package-lock-lint]
+    name: test (node V${{ matrix.node}})
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install Dependencies
+        run: npm ci
+      - name: Run Tests & Collect Coverage
+        run: npm run test:coveralls
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        if: matrix.node == '14'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    name: Release
+    needs: [package-lock-lint, test]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+      - name: Relase
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
