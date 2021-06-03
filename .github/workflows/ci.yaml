@@ -33,7 +33,7 @@ jobs:
         run: npm run test:coveralls
       - name: Coveralls
         uses: coverallsapp/github-action@master
-        if: matrix.node == '12'
+        if: matrix.node == '14'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
