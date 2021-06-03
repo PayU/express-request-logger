@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node_modules/.bin/_mocha -- --recursive ./test/*-test.js",
     "test:coverage": "./node_modules/.bin/nyc npm test",
-    "test:coveralls": "npm run test:coverage && cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
+    "test:coveralls": "npm run test:coverage && cat ./coverage/lcov.info"
   },
   "repository": {
     "type": "git",
