@@ -1011,8 +1011,8 @@ describe('logger-helpers tests', function () {
                     body: 'body',
                     test1: 'test2'
                 };
-                delete response.headers;
-                delete response._headers;
+                response.headers = {};
+                response._headers = {};
                 response._bodyStr = _.cloneDeep(newBody);
                 let prevBody = _.cloneDeep(response.body);
 
