@@ -1038,15 +1038,15 @@ describe('logger-helpers tests', function () {
                     body: 'body',
                     test1: 'test2'
                 };
-                response.headers['content-type'] = undefined;
-                response._headers['content-type'] = undefined;
+                delete response.headers['content-type'] ;
+                delete response._headers['content-type'] ;
                 response._bodyStr = _.cloneDeep(newBody);
                 let prevBody = _.cloneDeep(response.body);
 
                 loggerHelper.auditResponse(request, response, options);
 
                 expectedAuditResponse.body = JSON.stringify(newBody);
-                expectedAuditResponse.headers['content-type'] = undefined;
+                delete expectedAuditResponse.headers['content-type'];
 
                 sinon.assert.calledWith(loggerInfoStub, {
                     stage: 'end', 
