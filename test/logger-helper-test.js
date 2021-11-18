@@ -918,7 +918,7 @@ describe('logger-helpers tests', function () {
                 options.response.excludeHeaders = [headerToExclude, anotherHeaderToExclude];
                 response.setHeader(anotherHeaderToExclude, 'some value');
 
-                let prevHeaders = _.cloneDeep(response.headers);
+                let prevHeaders = _.cloneDeep(response.getHeaders());
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
