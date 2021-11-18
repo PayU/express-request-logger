@@ -78,8 +78,8 @@ describe('logger-helpers tests', function () {
         response = httpMocks.createResponse();
         response._bodyStr = JSON.stringify(body);
         response.timestamp = endTime;
-        response.headers = { 'header2': 'some-other-value', 'content-type': 'application/json' };
-        response._headers = response.headers;
+        response.setHeader('header2', 'some-other-value')
+        response.setHeader('content-type', 'application/json')
 
         options.logger.info = function () { };
         options.logger.warn = function () { };
@@ -879,12 +879,12 @@ describe('logger-helpers tests', function () {
             });
 
             beforeEach(function () {
-                response.headers[headerToExclude] = 'other-value';
+                response.setHeader(headerToExclude, 'other-value');
             });
 
             it('Should audit log without the specified header', function () {
                 options.response.excludeHeaders = [headerToExclude];
-                let prevHeaders = _.cloneDeep(response.headers);
+                let prevHeaders = _.cloneDeep(response.getHeaders());
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
@@ -895,11 +895,11 @@ describe('logger-helpers tests', function () {
                     'millis-timestamp': expectedMillisTimestamp
                 });
 
-                should.deepEqual(response.headers, prevHeaders, 'headers of response change');
+                should.deepEqual(response.getHeaders(), prevHeaders, 'headers of response change');
             });
             it('Should audit log without all headers', function () {
                 options.response.excludeHeaders = [ALL_FIELDS];
-                let prevHeaders = _.cloneDeep(response.headers);
+                let prevHeaders = _.cloneDeep(response.getHeaders());
                 loggerHelper.auditResponse(request, response, options);
                 expectedAuditResponse.headers = NA;
                 sinon.assert.calledOnce(loggerInfoStub);
@@ -911,14 +911,14 @@ describe('logger-helpers tests', function () {
                     'millis-timestamp': expectedMillisTimestamp
                 });
 
-                should.deepEqual(response.headers, prevHeaders, 'headers of response change');
+                should.deepEqual(response.getHeaders(), prevHeaders, 'headers of response change');
             });
             it('Should audit log without the specified headers, if there are more than one', function () {
                 var anotherHeaderToExclude = 'another';
                 options.response.excludeHeaders = [headerToExclude, anotherHeaderToExclude];
-                response.headers[anotherHeaderToExclude] = 'some value';
+                response.setHeader(anotherHeaderToExclude, 'some value');
 
-                let prevHeaders = _.cloneDeep(response.headers);
+                let prevHeaders = _.cloneDeep(response.getHeaders());
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.calledOnce(loggerInfoStub);
                 sinon.assert.calledWith(loggerInfoStub, {
@@ -929,7 +929,7 @@ describe('logger-helpers tests', function () {
                     'millis-timestamp': expectedMillisTimestamp
                 });
 
-                should.deepEqual(response.headers, prevHeaders, 'headers of response change');
+                should.deepEqual(response.getHeaders(), prevHeaders, 'headers of response change');
             });
             it('Should audit log with all headers, if exclude headers is an empty list', function () {
                 options.response.excludeHeaders = ['other-header'];
@@ -986,7 +986,7 @@ describe('logger-helpers tests', function () {
                     body: 'body',
                     test1: 'test2'
                 };
-                response.headers['content-type'] = testContentType;
+                response.setHeader('content-type', testContentType)
                 response._bodyStr = _.cloneDeep(newBody);
                 let prevBody = _.cloneDeep(response.body);
 
@@ -1011,8 +1011,10 @@ describe('logger-helpers tests', function () {
                     body: 'body',
                     test1: 'test2'
                 };
-                response.headers = undefined;
-                response._headers = undefined;
+
+                Object.keys(response.getHeaders())
+                  .map(headerName => response.removeHeader(headerName));
+
                 response._bodyStr = _.cloneDeep(newBody);
                 let prevBody = _.cloneDeep(response.body);
 
@@ -1038,15 +1040,14 @@ describe('logger-helpers tests', function () {
                     body: 'body',
                     test1: 'test2'
                 };
-                response.headers['content-type'] = undefined;
-                response._headers['content-type'] = undefined;
+                response.removeHeader('content-type') ;
                 response._bodyStr = _.cloneDeep(newBody);
                 let prevBody = _.cloneDeep(response.body);
 
                 loggerHelper.auditResponse(request, response, options);
 
                 expectedAuditResponse.body = JSON.stringify(newBody);
-                expectedAuditResponse.headers['content-type'] = undefined;
+                delete expectedAuditResponse.headers['content-type'];
 
                 sinon.assert.calledWith(loggerInfoStub, {
                     stage: 'end', 
