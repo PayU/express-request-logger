@@ -1,7 +1,7 @@
 'use strict';
 
 var httpMocks = require('node-mocks-http'),
-    utils = require('../lib/utils'),
+    utils = require('../dist/utils'),
     should = require('should');
 
 describe('utils tests', function () {

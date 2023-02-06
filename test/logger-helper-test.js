@@ -1,9 +1,9 @@
 'use strict';
 
 var httpMocks = require('node-mocks-http'),
-    loggerHelper = require('../lib/logger-helper'),
+    loggerHelper = require('../dist/logger-helper'),
     _ = require('lodash'),
-    utils = require('../lib/utils'),
+    utils = require('../dist/utils'),
     sinon = require('sinon'),
     should = require('should');
 

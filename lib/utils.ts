@@ -1,18 +1,19 @@
-'use strict';
+import { Request } from 'express';
+import { LevelsMap } from './types';
+import * as _ from 'lodash';
 
-var _ = require('lodash');
 const MASK = 'XXXXX';
 const NA = 'N/A';
 const VALID_LEVELS = ['trace', 'debug', 'info', 'warn', 'error']
 const DEFAULT_LEVEL = 'info';
 
-var getUrl = function (req) {
-    var url = req && req.url || NA;
+export const getUrl = function (req: Request) {
+    const url = req && req.url || NA;
 
     return url;
 };
 
-var getRoute = function (req) {
+export const getRoute = function (req: Request) {
     var url = NA;
 
     if (req) {
@@ -25,28 +26,29 @@ var getRoute = function (req) {
     return url;
 };
 
-function cleanOmitKeys(obj, omitKeys) {
+export function cleanOmitKeys(obj?: Object, omitKeys?: string[]) {
     if (obj && !_.isEmpty(omitKeys)) {
+        type KT = keyof typeof obj;
         Object.keys(obj).forEach(function (key) {
-            if (_.some(omitKeys, omitKey => key === omitKey)) {
-                delete obj[key];
+            if (_.some(omitKeys, (omitKey: any) => key === omitKey)) {
+                delete obj[key as KT];
             } else {
-                (obj[key] && typeof obj[key] === 'object') && cleanOmitKeys(obj[key]);
+                (obj[key as KT] && typeof obj[key as KT] === 'object') && cleanOmitKeys(obj[key as KT]);
             }
         });
     }
-    return obj;
+        return obj;
 };
 
-var shouldAuditURL = function (excludeURLs, req) {
-    return _.every(excludeURLs, function (path) {
+export const shouldAuditURL = function (excludeURLs: string[], req: Request) {
+    return _.every(excludeURLs, function (path: string) {
         var url = getUrl(req);
         var route = getRoute(req);
         return !(url.includes(path) || route.includes(path));
     });
 };
 
-var maskJson = function (jsonObj, fieldsToMask) {
+export const maskJson = function (jsonObj: object, fieldsToMask: string[]) {
     let jsonObjCopy = _.cloneDeepWith(jsonObj, function (value, key) {
         if (_.includes(fieldsToMask, key)) {
             return MASK
@@ -55,7 +57,7 @@ var maskJson = function (jsonObj, fieldsToMask) {
     return jsonObjCopy;
 };
 
-var getLogLevel = function (statusCode, levelsMap) {
+export const getLogLevel = function (statusCode: number, levelsMap: LevelsMap) {
     let level = DEFAULT_LEVEL; // Default
 
     if (levelsMap) {
@@ -72,7 +74,7 @@ var getLogLevel = function (statusCode, levelsMap) {
     return level;
 }
 
-var getBodyStr = function (body, maxBodyLength) {
+export const getBodyStr = function (body: string | any, maxBodyLength?: number) {
     if (_.isEmpty(body)) {
         return NA
     } else {
@@ -81,14 +83,3 @@ var getBodyStr = function (body, maxBodyLength) {
         return shouldShorten ? bodyStr.substr(0, maxBodyLength) + '...' : bodyStr;
     }
 }
-
-
-module.exports = {
-    getRoute: getRoute,
-    getUrl: getUrl,
-    shouldAuditURL: shouldAuditURL,
-    maskJson: maskJson,
-    cleanOmitKeys: cleanOmitKeys,
-    getLogLevel: getLogLevel,
-    getBodyStr: getBodyStr
-};
