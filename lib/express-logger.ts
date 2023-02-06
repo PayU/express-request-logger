@@ -1,16 +1,17 @@
-'use strict';
+import { RequestHandler } from 'express';
+import { AuditOptions, AugmentedRequest, AugmentedResponse } from './types';
+import * as _ from 'lodash';
 
-var _ = require('lodash'),
-    logger = require('bunyan').createLogger({ name: 'ExpressLogger' }),
+let logger = require('bunyan').createLogger({ name: 'ExpressLogger' }),
     loggerHelper = require('./logger-helper'),
-    setupOptions,
+    setupOptions: AuditOptions,
     flatten = require('flat');
 
-var audit = function (req, res, next) {
-    var oldWrite = res.write;
-    var oldEnd = res.end;
-    var oldJson = res.json;
-    var chunks = [];
+var audit: RequestHandler = function (req: AugmentedRequest, res: AugmentedResponse, next) {
+    const oldWrite = res.write;
+    const oldEnd = res.end;
+    const oldJson = res.json;
+    let chunks: any[] = [];
 
     // Log start time of request processing
     req.timestamp = new Date();
@@ -19,35 +20,38 @@ var audit = function (req, res, next) {
         loggerHelper.auditRequest(req, setupOptions);
     }
 
-    res.write = function (chunk) {
-        chunks.push(new Buffer(chunk));
-        oldWrite.apply(res, arguments);
+    res.write = function (chunk: any, ...rest: any[]) {
+        chunks.push(Buffer.from(chunk));
+        return (oldWrite as any).apply(res, [chunk, ...rest]);
     };
 
     // decorate response#json method from express
-    res.json = function (bodyJson) {
+    res.json = function (bodyJson: any, ...rest: any[]) {
         res._bodyJson = bodyJson;
-        oldJson.apply(res, arguments);
+        return (oldJson as any).apply(res, [bodyJson, ...rest]);
     };
 
     // decorate response#end method from express
-    res.end = function (chunk) {
+    // TODO Can't seem to get the types to match.
+    // @ts-ignore 
+    res.end = function (chunk: any, ...rest): AugmentedResponse {
         res.timestamp = new Date();
         if (chunk) {
-            chunks.push(new Buffer(chunk));
+            chunks.push(Buffer.from(chunk));
         }
 
         res._bodyStr = Buffer.concat(chunks).toString('utf8');
 
         // call to original express#res.end()
-        oldEnd.apply(res, arguments);
+        const ret = (oldEnd as any).apply(res, [chunk, ...rest]);
         loggerHelper.auditResponse(req, res, setupOptions);
+        return ret;
     };
 
     next();
 };
 
-module.exports = function (options) {
+export default function (options: Partial<AuditOptions>) {
     options = options || {};
     var defaults = {
         logger: logger,
@@ -76,14 +80,14 @@ module.exports = function (options) {
         }
     };
 
-    _.defaultsDeep(options, defaults);
-    setupOptions = validateArrayFields(options, defaults);
+    setupOptions = _.defaultsDeep(options, defaults);
+    validateArrayFields(options, defaults);
     setBodyLengthFields(setupOptions);
     return audit;
 };
 
 // Convert all options fields that need to be array by default
-function validateArrayFields(options, defaults) {
+function validateArrayFields(options: Partial<AuditOptions>, defaults: Record<string, any>) {
     let defaultsCopy = Object.assign({}, defaults);
     delete defaultsCopy.logger;
 
@@ -96,12 +100,10 @@ function validateArrayFields(options, defaults) {
             throw new Error(errMsg);
         }
     });
-
-    return options;
 }
 
-function setBodyLengthFields(options) {
-    const isValid = field => field && !isNaN(field) && field > 0;
+function setBodyLengthFields(options: AuditOptions) {
+    const isValid = (field: any) => field && !isNaN(field) && field > 0;
     options.request.maxBodyLength = !isValid(options.request.maxBodyLength) ? undefined : options.request.maxBodyLength;
     options.response.maxBodyLength = !isValid(options.response.maxBodyLength) ? undefined : options.response.maxBodyLength;
 }

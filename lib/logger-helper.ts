@@ -1,28 +1,29 @@
-'use strict';
+import { Request, Response } from 'express';
+import { AuditOptions, AugmentedRequest, AugmentedResponse } from './types';
+import * as utils from './utils';
+import * as _ from 'lodash';
 
-var utils = require('./utils');
-var _ = require('lodash');
-var ALL_FIELDS = '*';
+const ALL_FIELDS = '*';
 const NA = 'N/A';
 const DEFAULT_LOG_LEVEL = 'info';
 const START = 'start';
 const END = 'end';
 
-var auditRequest = function (req, options) {
-    var shouldAudit = utils.shouldAuditURL(options.excludeURLs, req);
+export const auditRequest = function (req: AugmentedRequest, options: AuditOptions) {
+    const shouldAudit = utils.shouldAuditURL(options.excludeURLs, req);
 
     if (shouldAudit) {
-        var request;
+        let request;
 
         if (options.setupFunc) {
-            options.setupFunc(req, res);
+            options.setupFunc(req);
         }
 
         if (options.request.audit) {
             request = getRequestAudit(req, options);
         }
 
-        var auditObject = {
+        let auditObject = {
             request: request,
             'millis-timestamp': Date.now(),
             'utc-timestamp': new Date().toISOString(),
@@ -38,7 +39,7 @@ var auditRequest = function (req, options) {
     }
 };
 
-var auditResponse = function (req, res, options) {
+export const auditResponse = function (req: AugmentedRequest, res: AugmentedResponse, options: AuditOptions) {
     var request;
     var response;
 
@@ -79,10 +80,11 @@ var auditResponse = function (req, res, options) {
     }
 };
 
-function getRequestAudit(req, options) {
+function getRequestAudit(req: AugmentedRequest, options: AuditOptions) {
     var headers = _.get(req, 'headers');
     var requestFullURL = utils.getUrl(req);
     var requestRoute = utils.getRoute(req);
+    // @ts-ignore
     var queryParams = req && req.query !== {} ? req.query : NA;
     var method = req && req.method ? req.method : NA;
     var URLParams = req && req.params ? req.params : NA;
@@ -117,7 +119,7 @@ function getRequestAudit(req, options) {
     return auditObject;
 }
 
-function handleResponseJson(objJson, objStr, logger, excludeFields, maskFields) {
+function handleResponseJson(objJson: any, objStr: any, logger: any, excludeFields: string[], maskFields: string[]) {
     let result;
     if (shouldBeParsed(maskFields, excludeFields)) {
         result = objJson || objStr
@@ -127,7 +129,7 @@ function handleResponseJson(objJson, objStr, logger, excludeFields, maskFields) 
     return handleJson(result, logger, excludeFields, maskFields);
 }
 
-function handleJson(obj, logger, excludeFields, maskFields) {
+function handleJson(obj: any, logger: any, excludeFields: string[], maskFields: string[]) {
 
     let result = obj;
     if (_.includes(excludeFields, ALL_FIELDS)) {
@@ -148,11 +150,11 @@ function handleJson(obj, logger, excludeFields, maskFields) {
                 //order is important because body is clone first
                 let maskedClonedObj = utils.maskJson(jsonObj, maskFields);
                 result = utils.cleanOmitKeys(maskedClonedObj, excludeFields);
-            } catch (err) {
+            } catch (err: unknown) {
                 logger.warn({
                     error: {
-                        message: err.message,
-                        stack: err.stack
+                        message: (err as Error).message,
+                        stack: (err as Error).stack
                     }
                 }, 'Error parsing json');
                 result = undefined;
@@ -162,13 +164,13 @@ function handleJson(obj, logger, excludeFields, maskFields) {
     return result;
 }
 
-function shouldBeParsed(maskFields, excludeFields) {
+function shouldBeParsed(maskFields: string[], excludeFields: string[]) {
     return !_.includes(excludeFields, ALL_FIELDS) && (!_.isEmpty(maskFields) || !_.isEmpty(excludeFields));
 }
 
-function getResponseAudit(req, res, options) {
+function getResponseAudit(req: AugmentedRequest, res: AugmentedResponse, options: AuditOptions) {
     var headers = res && 'function' === typeof res.getHeaders ? res.getHeaders() : _.get(res, '_headers');
-    var elapsed = req && res ? res.timestamp - req.timestamp : 0;
+    var elapsed = req && res && req.timestamp && res.timestamp ? res.timestamp.valueOf() - req.timestamp.valueOf() : 0;
     var timestamp = res && res.timestamp ? res.timestamp.toISOString() : NA;
     var timestamp_ms = res && res.timestamp ? res.timestamp.valueOf() : NA;
     var statusCode = res && res.statusCode ? res.statusCode : NA;
@@ -198,19 +200,14 @@ function getResponseAudit(req, res, options) {
     return auditObject;
 }
 
-function isJsonBody(headers) {
+function isJsonBody(headers: any) {
     return headers && headers['content-type'] && headers['content-type'].includes('application/json')
 }
 
-function getMaskedQuery(query, fieldsToMask) {
+function getMaskedQuery(query: any, fieldsToMask: string[]) {
     if (query) {
         return !_.isEmpty(fieldsToMask) ? utils.maskJson(query, fieldsToMask) : query
     } else {
         return NA;
     }
 }
-
-module.exports = {
-    auditRequest: auditRequest,
-    auditResponse: auditResponse
-};

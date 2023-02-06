@@ -1,11 +1,12 @@
 'use strict';
 
 var  rewire = require('rewire'),
-    expressLogger = rewire('../lib/express-logger'),
+    expressLoggerRequire = rewire('../dist/express-logger'),
     httpMocks = require('node-mocks-http'),
-    loggerHelper = require('../lib/logger-helper'),
+    loggerHelper = require('../dist/logger-helper'),
     sinon = require('sinon'),
     should = require('should');
+var expressLogger = expressLoggerRequire.default;
 
 describe('express-logger tests', function(){
     var sandbox, auditRequestStub, auditResponseStub;
@@ -85,7 +86,7 @@ describe('express-logger tests', function(){
                 };
 
             expressLogger(options);
-            let convertedOptions = expressLogger.__get__('setupOptions');
+            let convertedOptions = expressLoggerRequire.__get__('setupOptions');
            delete convertedOptions.logger;
            (convertedOptions).should.containEql(expectedOptions);
 
