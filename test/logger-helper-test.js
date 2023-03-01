@@ -500,6 +500,17 @@ describe('logger-helpers tests', function () {
                 sinon.assert.notCalled(loggerInfoStub);
             });
         });
+        describe('And shouldSkipAuditFunc returns true', () => {
+            it('Should not audit the request', () => {
+                shouldAuditURLStub.returns(true);
+                options.shouldSkipAuditFunc =(req, res) => {
+                    return true;
+                }
+
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.notCalled(loggerInfoStub);
+            })
+        })
         describe('And shouldAuditURL returns true', function () {
             it('Should audit request if options.request.audit is true', function () {
                 shouldAuditURLStub.returns(true);
