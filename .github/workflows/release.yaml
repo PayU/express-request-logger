@@ -1,0 +1,22 @@
+name: Release
+
+on: [ workflow_dispatch ]
+
+jobs:
+  release:
+    name: Release
+    needs: [package-lock-lint, test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
