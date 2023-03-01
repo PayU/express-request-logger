@@ -48,6 +48,26 @@ the `express-requests-logger` accepts the following properties in the options ob
 The logger to use for logging the request/response.
 Package tested only with [bunyan](https://github.com/trentm/node-bunyan) logger, but should work with any logger which has a `info` method which takes an object.
 
+#### shouldSkipAuditFunc
+
+Should be a function, that returns boolean value to indicate whether to skip the audit for the current request. Usually the logic should be around the request/response params. Useful to provide a custom logic for cases we would want to skip logging specific request.
+
+The default implementation of the function returns false.
+
+Example, skipping logging of all success responses:
+```js
+shouldSkipAuditFunc: function(req, res){
+    let shouldSkip = false;
+    if (res.statusCode === 200){
+        // _bodyJson is added by this package
+        if (res._bodyJson.result === "success"){
+            shouldSkip = true;
+        }
+    }
+
+    return shouldSkip;
+}
+```
 #### doubleAudit
 
 `true` - log once the request arrives (request details), and log after response is sent (both request and response). - Useful if there is a concern that the server will crash during the request and there is a need to log the request before it's processed.
@@ -172,6 +192,10 @@ app.use(audit({
         excludeBody: [‘*’], // Exclude all body from responses
         maskHeaders: [‘header1’], // Mask 'header1' header in incoming requests
         maxBodyLength: 50 // limit length to 50 chars + '...'
+    },
+    shouldSkipAuditFunc: function(req, res){
+        // Custom logic here.. i.e: return res.statusCode === 200
+        return false;
     }
 }));
 ```
