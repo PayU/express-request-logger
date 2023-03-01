@@ -510,7 +510,38 @@ describe('logger-helpers tests', function () {
                 loggerHelper.auditResponse(request, response, options);
                 sinon.assert.notCalled(loggerInfoStub);
             })
+            it('Should pass req and res objects to the func', () => {
+                shouldAuditURLStub.returns(true);
+                options.shouldSkipAuditFunc =(req, res) => {
+                    should(req).eql(request);
+                    should(res).eql(response);
+                    return true;
+                }
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.notCalled(loggerInfoStub);
+            })
         })
+        describe('And shouldSkipAuditFunc returns false', () => {
+            it('Should audit the request', () => {
+                shouldAuditURLStub.returns(true);
+                options.shouldSkipAuditFunc =(req, res) => {
+                    return false;
+                }
+
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+            })
+            it('Should pass req and res objects to the func', () => {
+                shouldAuditURLStub.returns(true);
+                options.shouldSkipAuditFunc =(req, res) => {
+                    should(req).eql(request);
+                    should(res).eql(response);
+                    return false;
+                }
+                loggerHelper.auditResponse(request, response, options);
+                sinon.assert.calledOnce(loggerInfoStub);
+            })
+        })        
         describe('And shouldAuditURL returns true', function () {
             it('Should audit request if options.request.audit is true', function () {
                 shouldAuditURLStub.returns(true);
