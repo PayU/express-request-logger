@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.0] - 2023-03-01
 
 ### Breaking
-- 5xx status code are now printed on error level [@ugolas](https://github.com/ugolas).
+- 5xx status code log message level is now ERROR [@ugolas](https://github.com/ugolas).
+- Remove official support for node versions older than 16 [@kobik](https://github.com/kobik).
 
 ### Added
 - Accepts a user function to control whether to print the log message [@ugolas](https://github.com/ugolas).
