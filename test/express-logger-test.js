@@ -229,5 +229,11 @@ describe('express-logger tests', function(){
             should(res._bodyStr).eql('chunk');
             should(res._bodyJson).eql({key: 'value'});
         });
+        it('Should by default return false in shouldSkipAuditFunc', () => {
+            expressLogger();
+            let convertedOptions = expressLogger.__get__('setupOptions');
+            let res = convertedOptions.shouldSkipAuditFunc()
+            should(res).eql(false);
+        })
     });
 });

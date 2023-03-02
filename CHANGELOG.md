@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2023-03-01
+
+### Breaking
+- 5xx status code log message level is now ERROR [@ugolas](https://github.com/ugolas).
+- Remove official support for node versions older than 16 [@kobik](https://github.com/kobik).
+
+### Added
+- Accepts a user function to control whether to print the log message [@ugolas](https://github.com/ugolas).
+  
+
 ## [3.0.3] - 2021-03-08
 
 ### Changed
