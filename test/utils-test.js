@@ -45,6 +45,11 @@ describe('utils tests', function () {
                 baseUrl: '/path',
             });
         });
+        it('Should return url_route when req.baseUrl is empty string', function () {
+            request.baseUrl = '';
+            var url_route = utils.getRoute(request);
+            should(url_route).eql('/:id');
+        });
         it('Should return url_route for a path', function () {
             var url_route = utils.getRoute(request);
             should(url_route).eql(expectedRoute);
