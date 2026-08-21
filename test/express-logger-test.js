@@ -201,6 +201,22 @@ describe('express-logger tests', function(){
             should(auditResponseStub.calledOnce).eql(true);
             should(res._bodyStr).eql('chunk');
         });
+        it('Should return the underlying write() return value to preserve backpressure', function(){
+            var auditMethod = expressLogger();
+            // Start request
+            auditMethod(req, res, next);
+            should(next.calledOnce).eql(true);
+
+            // Underlying write() signals its buffer is full
+            resWriteStub.returns(false);
+            should(res.write('chunk')).eql(false);
+
+            // ... and that it has drained
+            resWriteStub.returns(true);
+            should(res.write('chunk')).eql(true);
+
+            should(resWriteStub.calledTwice).eql(true);
+        });
         it('Should add body from end chunk to response', function(){
             var auditMethod = expressLogger();
             // Start request
